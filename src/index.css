@@ -1,0 +1,338 @@
+:root {
+  --ink: #1c1710;
+  --ink-soft: #4a4033;
+  --rule: #cbbca6;
+  --paper: #f4ead8;
+  --paper-deep: #e7d7bc;
+  --gilt: #8a6a32;
+  --blood: #6e2e24;
+  --shadow: rgba(40, 28, 12, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 600px at 50% -10%, #fff6e6 0%, transparent 55%),
+    var(--paper);
+  font-family: "Source Sans 3", "Segoe UI", sans-serif;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+select {
+  font: inherit;
+}
+
+.shell {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 4rem;
+}
+
+.masthead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 0.85rem;
+  margin-bottom: 1.75rem;
+}
+
+.masthead a {
+  text-decoration: none;
+}
+
+.wordmark {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.mast-nav {
+  display: flex;
+  gap: 1.25rem;
+  font-size: 0.92rem;
+  letter-spacing: 0.04em;
+}
+
+.hero {
+  padding: 3rem 0 2rem;
+  text-align: center;
+}
+
+.kicker {
+  color: var(--gilt);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
+
+h1,
+h2,
+h3 {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.hero h1 {
+  font-size: clamp(2.2rem, 6vw, 4.1rem);
+  margin: 0.4rem 0 0.6rem;
+}
+
+.hero .author {
+  font-style: italic;
+  color: var(--ink-soft);
+  margin: 0 0 1.5rem;
+}
+
+.lede {
+  max-width: 38rem;
+  margin: 0 auto 2rem;
+  color: var(--ink-soft);
+  line-height: 1.65;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-block;
+  text-decoration: none;
+  border: 1px solid var(--ink);
+  padding: 0.65rem 1.15rem;
+  background: var(--ink);
+  color: var(--paper);
+  letter-spacing: 0.06em;
+}
+
+.btn.ghost {
+  background: transparent;
+  color: var(--ink);
+}
+
+.notes {
+  margin-top: 3rem;
+  border-top: 1px solid var(--rule);
+  padding-top: 1.25rem;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+
+.notes ul {
+  padding-left: 1.15rem;
+}
+
+.part {
+  margin: 2.25rem 0;
+}
+
+.part h2 {
+  font-size: 1.7rem;
+  margin-bottom: 0.35rem;
+}
+
+.chapter-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.chapter-list li {
+  border-top: 1px solid var(--rule);
+}
+
+.chapter-list a {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr auto;
+  gap: 1rem;
+  align-items: baseline;
+  text-decoration: none;
+  padding: 0.9rem 0.15rem;
+}
+
+.chapter-list .num {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  color: var(--blood);
+  letter-spacing: 0.08em;
+}
+
+.chapter-list .pl {
+  color: var(--gilt);
+  font-size: 0.85rem;
+}
+
+.shell.lectio {
+  max-width: 68rem;
+}
+
+.reader {
+  width: 100%;
+}
+
+.reader h2 {
+  font-size: 1.85rem;
+  margin: 0 0 0.35rem;
+}
+
+.meta {
+  color: var(--gilt);
+  font-size: 0.86rem;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.75rem;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.toolbar select,
+.step-btn {
+  border: 1px solid var(--rule);
+  background: #fffaf1;
+  padding: 0.35rem 0.55rem;
+}
+
+.passage.facing {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 0;
+  align-items: start;
+}
+
+.passage.facing .page-la {
+  padding-right: 2rem;
+  margin-right: 2rem;
+  border-right: 1px solid var(--rule);
+}
+
+.passage.facing .page-en {
+  padding-left: 0.15rem;
+}
+
+.passage.solo {
+  max-width: 38rem;
+  margin: 0 auto;
+}
+
+.col-label {
+  margin: 0 0 0.55rem;
+  color: var(--gilt);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+}
+
+.latin {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.5rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.english {
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.lacuna {
+  background: #efe2cc;
+  border: 1px dashed var(--gilt);
+  padding: 1rem 1.1rem;
+}
+
+.lacuna-note {
+  grid-column: 1 / -1;
+  margin: 0 0 1rem;
+}
+
+@media (max-width: 800px) {
+  .passage.facing {
+    grid-template-columns: 1fr;
+  }
+
+  .passage.facing .page-la {
+    padding-right: 0;
+    margin-right: 0;
+    margin-bottom: 1.25rem;
+    border-right: none;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--rule);
+  }
+}
+
+.nav-passages {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.75rem;
+}
+
+.nav-passages a,
+.nav-passages span {
+  text-decoration: none;
+  font-size: 0.92rem;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.45rem;
+  margin: 0.75rem 0 1.25rem;
+}
+
+@media (max-width: 700px) {
+  .steps {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.step-btn.active {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+.prompt {
+  font-style: italic;
+  color: var(--ink-soft);
+  margin: 0 0 1rem;
+}
+
+.progress {
+  height: 3px;
+  background: var(--paper-deep);
+  margin: 0.5rem 0 1.25rem;
+}
+
+.progress > span {
+  display: block;
+  height: 100%;
+  background: var(--blood);
+}
