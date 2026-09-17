@@ -28,9 +28,38 @@ export type ParsedDoc = {
 export type WorkMeta = Pick<Work, "id" | "source" | "lectio">;
 
 const PASSAGE_HEADING = /^### (.+) \(PL (.+)\)$/;
+const BERNARD_SECTION = /^####\s+(\S+)\s*$/;
 const CHAPTER_PL = /^PL (.+)$/;
 const CAPUT_HEADING = /^Caput ([IVXLCDM]+)\.\s*(.*)$/;
 const CHAPTER_HEADING = /^Chapter ([IVXLCDM]+)\.\s*(.*)$/;
+
+export type PassageBlock = {
+  n?: string;
+  text: string;
+};
+
+/** Split stored passage text on `§52` markers produced from `#### 52`. */
+export function splitPassageBlocks(text: string): PassageBlock[] {
+  const lines = text.split("\n");
+  const blocks: PassageBlock[] = [];
+  let current: PassageBlock = { text: "" };
+  const flush = () => {
+    const body = current.text.trim();
+    if (body || current.n) blocks.push({ n: current.n, text: body });
+    current = { text: "" };
+  };
+  for (const line of lines) {
+    const mark = /^§(\S+)\s*$/.exec(line.trim());
+    if (mark) {
+      flush();
+      current = { n: mark[1], text: "" };
+      continue;
+    }
+    current.text = current.text ? `${current.text}\n${line}` : line;
+  }
+  flush();
+  return blocks.length ? blocks : [{ text: text.trim() }];
+}
 
 export function parseTreatiseMarkdown(markdown: string): ParsedDoc {
   const lines = markdown.replace(/^\uFEFF/, "").replace(/\r\n/g, "\n").split("\n");
@@ -108,6 +137,12 @@ export function parseTreatiseMarkdown(markdown: string): ParsedDoc {
     }
     if (line.startsWith("> ") && passage) {
       passage.lacunaNote = line.slice(2).trim();
+      i += 1;
+      continue;
+    }
+    const bernard = BERNARD_SECTION.exec(line);
+    if (bernard && passage) {
+      passage.lines.push(`§${bernard[1]}`);
       i += 1;
       continue;
     }

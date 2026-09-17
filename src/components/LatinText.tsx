@@ -3,6 +3,10 @@ import { Fragment, type KeyboardEvent, type MouseEvent } from "react";
 /** Word-token boundary (Latin letters, incl. accented, plus apostrophes). */
 const WORD_RE = /([A-Za-z\u00C0-\u024F''\u2019]+)/;
 
+export function latinWordCount(text: string): number {
+  return text.split(WORD_RE).filter((_, i) => i % 2 === 1).length;
+}
+
 export type WordHit = {
   word: string;
   index: number;
@@ -12,12 +16,13 @@ export type WordHit = {
 type Props = {
   text: string;
   activeIndex: number | null;
+  indexOffset?: number;
   onSelect: (hit: WordHit) => void;
 };
 
-export function LatinText({ text, activeIndex, onSelect }: Props) {
+export function LatinText({ text, activeIndex, indexOffset = 0, onSelect }: Props) {
   const parts = text.split(WORD_RE);
-  let wordIndex = 0;
+  let wordIndex = indexOffset;
 
   return (
     <p className="latin">

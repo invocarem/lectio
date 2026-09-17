@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { DictPopup } from "../components/DictPopup";
-import { LatinText } from "../components/LatinText";
+import { LatinText, latinWordCount } from "../components/LatinText";
 import { allChapters, findChapter } from "../content/types";
+import { splitPassageBlocks } from "../content/fromMarkdown";
 import { work } from "../content/work";
 
 const STORAGE_KEY = "lectio:last";
@@ -44,6 +45,8 @@ export function LectioPage() {
   }
 
   const passage = chapter.passages[index];
+  const laBlocks = splitPassageBlocks(passage.la);
+  const enBlocks = splitPassageBlocks(passage.en);
   const globalIndex = sequence.findIndex(
     (item) => item.chapterId === chapter.id && item.passageIdx === index,
   );
@@ -125,23 +128,39 @@ export function LectioPage() {
             {mode !== "en" ? (
               <div className="page page-la">
                 {mode === "both" ? <p className="col-label">Latina</p> : null}
-                <LatinText
-                  text={passage.la}
-                  activeIndex={dict?.index ?? null}
-                  onSelect={(hit) =>
-                    setDict({
-                      word: hit.word,
-                      index: hit.index,
-                      anchor: hit.element.getBoundingClientRect(),
-                    })
-                  }
-                />
+                {laBlocks.map((block, blockIndex) => {
+                  const offset = laBlocks
+                    .slice(0, blockIndex)
+                    .reduce((sum, item) => sum + latinWordCount(item.text), 0);
+                  return (
+                    <div className="block" key={`la-${block.n ?? blockIndex}`}>
+                      {block.n ? <p className="bernard-n">§{block.n}</p> : null}
+                      <LatinText
+                        text={block.text}
+                        indexOffset={offset}
+                        activeIndex={dict?.index ?? null}
+                        onSelect={(hit) =>
+                          setDict({
+                            word: hit.word,
+                            index: hit.index,
+                            anchor: hit.element.getBoundingClientRect(),
+                          })
+                        }
+                      />
+                    </div>
+                  );
+                })}
               </div>
             ) : null}
             {mode !== "la" ? (
               <div className="page page-en">
                 {mode === "both" ? <p className="col-label">English</p> : null}
-                <p className="english">{passage.en}</p>
+                {enBlocks.map((block, blockIndex) => (
+                  <div className="block" key={`en-${block.n ?? blockIndex}`}>
+                    {block.n ? <p className="bernard-n">§{block.n}</p> : null}
+                    <p className="english">{block.text}</p>
+                  </div>
+                ))}
               </div>
             ) : null}
           </div>

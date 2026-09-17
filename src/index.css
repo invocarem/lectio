@@ -253,10 +253,23 @@ h3 {
 }
 
 .latin {
-  font-family: "Cormorant Garamond", Georgia, serif;
-  font-size: 1.5rem;
-  line-height: 1.55;
+  font-family: Inconsolata, ui-monospace, "Cascadia Mono", "Segoe UI Mono", monospace;
+  font-weight: 400;
+  font-stretch: 80%;
+  font-size: 1.05rem;
+  line-height: 1.7;
   margin: 0;
+}
+
+.block + .block {
+  margin-top: 1.15rem;
+}
+
+.bernard-n {
+  margin: 0 0 0.35rem;
+  color: var(--gilt);
+  letter-spacing: 0.12em;
+  font-size: 0.78rem;
 }
 
 .english {

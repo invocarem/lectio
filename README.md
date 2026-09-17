@@ -30,6 +30,8 @@ The treatise has one source of truth, in two language files:
 
 Edit those files to change the text. The reader loads them at runtime. `src/content/work.ts` holds only app metadata (source notes, facsimile leaf index, lectio prompts), not the treatise.
 
+`###` headings are lectio passages and may combine Bernard’s numbers (`### 52–53`). Bernard’s own Migne paragraphs are marked in the source with `#### 52`; the reader shows them as **§52**. Do not use `__52__` for this: underscores would be treated as Latin text.
+
 Spelling follows the Migne printing with *j* respelt *i* (`charitas`, `iam`, `iactantia`). Mabillon’s closing *Admonitio* on cols. 971–972 is editorial and is omitted from the lectio text. Columns **945–946** have no facsimile in `public/facsimiles/`; their Latin is supplied from the same Migne edition so the treatise reads continuously.
 
 ## Facsimiles
