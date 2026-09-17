@@ -11,6 +11,8 @@ npm run dev
 
 Open the printed local URL (Vite, usually `http://localhost:5173/`).
 
+On a lectio page, click a **Latin word** for this treatise’s closed lexicon (a curated Bernard gloss if one exists, otherwise Whitaker). The reader does not call a dictionary service on every click.
+
 | Route | Page |
 | --- | --- |
 | `/` | Home |
@@ -35,3 +37,7 @@ Spelling follows the Migne printing with *j* respelt *i* (`charitas`, `iam`, `ia
 Page images are in `public/facsimiles/` (`pl-941-942.png`, …). The scans cover **941–944** and **947–972**. Columns **953–954** are `MLT_1-4`, page 3. There is no `pl-945-946.png`.
 
 Each passage records a facsimile filename, but the reader does not yet show the image.
+
+## Lexicon
+
+Word glosses live in `src/content/lexicon/` and cover *De gradibus* only. `lexicon.json` is what the reader loads; `overrides.json` holds hand-authored Bernard cards. See `src/content/lexicon/README.md` to rebuild.

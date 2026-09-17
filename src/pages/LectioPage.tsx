@@ -1,9 +1,17 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
-import { work } from "../content/work";
+import { DictPopup } from "../components/DictPopup";
+import { LatinText } from "../components/LatinText";
 import { allChapters, findChapter } from "../content/types";
+import { work } from "../content/work";
 
 const STORAGE_KEY = "lectio:last";
+
+type DictOpen = {
+  word: string;
+  index: number;
+  anchor: DOMRect;
+};
 
 export function LectioPage() {
   const { chapterId = "", passageIndex = "0" } = useParams();
@@ -12,6 +20,7 @@ export function LectioPage() {
   const index = Number(passageIndex);
   const [mode, setMode] = useState<"both" | "la" | "en">("both");
   const [stepId, setStepId] = useState(work.lectio.steps[0].id);
+  const [dict, setDict] = useState<DictOpen | null>(null);
 
   const sequence = useMemo(() => {
     const chapters = allChapters(work);
@@ -23,6 +32,12 @@ export function LectioPage() {
       })),
     );
   }, []);
+
+  const closeDict = useCallback(() => setDict(null), []);
+
+  useEffect(() => {
+    setDict(null);
+  }, [chapterId, index, mode]);
 
   if (!chapter || Number.isNaN(index) || !chapter.passages[index]) {
     return <Navigate to="/contents" replace />;
@@ -102,6 +117,7 @@ export function LectioPage() {
               </select>
             </label>
             <span>Passage {globalIndex + 1} of {sequence.length}</span>
+            {mode !== "en" ? <span className="hint">Click a Latin word for a gloss.</span> : null}
           </div>
 
           <div className={`passage${passage.lacuna ? " lacuna" : ""}${mode === "both" ? " facing" : " solo"}`}>
@@ -109,7 +125,17 @@ export function LectioPage() {
             {mode !== "en" ? (
               <div className="page page-la">
                 {mode === "both" ? <p className="col-label">Latina</p> : null}
-                <p className="latin">{passage.la}</p>
+                <LatinText
+                  text={passage.la}
+                  activeIndex={dict?.index ?? null}
+                  onSelect={(hit) =>
+                    setDict({
+                      word: hit.word,
+                      index: hit.index,
+                      anchor: hit.element.getBoundingClientRect(),
+                    })
+                  }
+                />
               </div>
             ) : null}
             {mode !== "la" ? (
@@ -119,6 +145,8 @@ export function LectioPage() {
               </div>
             ) : null}
           </div>
+
+          {dict ? <DictPopup word={dict.word} anchor={dict.anchor} onClose={closeDict} /> : null}
 
           <nav className="nav-passages">
             {prev ? (

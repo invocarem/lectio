@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lexicon:extract": "python3 tools/extract_wordlist.py",
+    "lexicon:parse": "python3 tools/parse_analyses.py",
+    "lexicon:curate": "python3 tools/apply_overrides.py"
   },
   "dependencies": {
     "react": "^19.1.1",

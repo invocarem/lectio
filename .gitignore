@@ -3,3 +3,6 @@ dist
 src/extracted
 *.local
 .DS_Store
+
+# Reproducible lexicon build artifact (regenerate with Whitaker)
+src/content/lexicon/analyses.json

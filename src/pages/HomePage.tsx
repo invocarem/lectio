@@ -26,7 +26,7 @@ export function HomePage() {
           A quiet reader for Bernard of Clairvaux’s treatise on the twelve steps of
           humility and pride. The Latin is transcribed from the Migne pages you
           supplied; English sits beside it for meditation, not as a substitute
-          recension.
+          recension. Click a Latin word for a gloss.
         </p>
         <div className="actions">
           <Link className="btn" to={`/lectio/${firstChapter.id}/0`}>
