@@ -1,23 +1,24 @@
 #!/usr/bin/env python3
-"""Build a unique-form list from this treatise's Latin. No morphology.
+"""Build a unique-form list from a work's Latin. No morphology.
 
 Usage:
     python tools/extract_wordlist.py
+    python tools/extract_wordlist.py --work rule
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import re
 from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "src" / "content" / "latin.md"
-OUT = ROOT / "src" / "content" / "lexicon" / "forms.json"
+CONTENT = ROOT / "src" / "content"
 
 SKIP_HEADING = re.compile(
-    r"^(Retractatio|Praefatio|Caput|Admonitio|Pars|Chapter)\b",
+    r"^(Retractatio|Praefatio|Caput|Capitulum|Prologus|Admonitio|Pars|Chapter)\b",
     re.IGNORECASE,
 )
 EDITORIAL = re.compile(r"^\*")
@@ -126,14 +127,20 @@ def extract(text: str) -> dict:
 
 
 def main() -> None:
-    if not SOURCE.is_file():
-        raise SystemExit(f"Missing {SOURCE.relative_to(ROOT)}")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--work", default="gradibus", help="work id (default: gradibus)")
+    args = parser.parse_args()
 
-    data = extract(SOURCE.read_text(encoding="utf-8"))
-    data["source"] = str(SOURCE.relative_to(ROOT))
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"Wrote {OUT.relative_to(ROOT)} ({data['form_count']} forms, {data['token_count']} tokens)")
+    source = CONTENT / args.work / "latin.md"
+    out = CONTENT / args.work / "lexicon" / "forms.json"
+    if not source.is_file():
+        raise SystemExit(f"Missing {source.relative_to(ROOT)}")
+
+    data = extract(source.read_text(encoding="utf-8"))
+    data["source"] = str(source.relative_to(ROOT))
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"Wrote {out.relative_to(ROOT)} ({data['form_count']} forms, {data['token_count']} tokens)")
 
 
 if __name__ == "__main__":

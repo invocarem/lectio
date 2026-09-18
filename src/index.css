@@ -50,7 +50,7 @@ select {
 .masthead {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   gap: 1rem;
   border-bottom: 1px solid var(--rule);
   padding-bottom: 0.85rem;
@@ -71,8 +71,63 @@ select {
 .mast-nav {
   display: flex;
   gap: 1.25rem;
+  align-items: center;
   font-size: 0.92rem;
   letter-spacing: 0.04em;
+}
+
+.work-pick {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.work-pick select {
+  font: inherit;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  background: #fffaf1;
+  padding: 0.3rem 0.45rem;
+}
+
+.work-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 3rem;
+}
+
+.work-card {
+  border-top: 1px solid var(--rule);
+  padding: 2rem 0 1.5rem;
+}
+
+.work-card h2 {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  margin: 0.35rem 0 0.4rem;
+}
+
+.work-card h2 a {
+  text-decoration: none;
+}
+
+.work-card .author {
+  font-style: italic;
+  color: var(--ink-soft);
+  margin: 0 0 0.85rem;
+}
+
+.work-card .actions {
+  justify-content: flex-start;
+}
+
+.work-card .meta {
+  margin-bottom: 1rem;
 }
 
 .hero {
@@ -270,10 +325,10 @@ h3 {
 }
 
 .bernard-n {
-  margin: 0 0 0.35rem;
   color: var(--gilt);
-  letter-spacing: 0.12em;
-  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  font-size: 0.82em;
+  font-weight: 600;
 }
 
 .english {
@@ -320,6 +375,64 @@ h3 {
 .nav-passages span {
   text-decoration: none;
   font-size: 0.92rem;
+}
+
+.source-leaf {
+  margin: 1.75rem 0 0;
+  border-top: 1px dashed var(--rule);
+  padding-top: 1rem;
+}
+
+.source-leaf.missing p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+.source-leaf-toggle,
+.leaf-btn {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.leaf-btn svg {
+  width: 1.7rem;
+  height: 1.7rem;
+  display: block;
+  transition: transform 0.15s ease, filter 0.15s ease;
+  filter: drop-shadow(0 1px 1px var(--shadow));
+}
+
+.leaf-btn:hover svg,
+.leaf-btn:focus-visible svg {
+  transform: scale(1.1);
+  filter: drop-shadow(0 2px 3px var(--shadow)) saturate(1.2);
+}
+
+.leaf-btn.open svg {
+  transform: rotate(90deg);
+}
+
+.leaf-figure {
+  margin: 1rem 0 0;
+  max-width: 34rem;
+}
+
+.leaf-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--rule);
+  background: #fff;
+}
+
+.leaf-figure figcaption {
+  margin-top: 0.5rem;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
 }
 
 .steps {

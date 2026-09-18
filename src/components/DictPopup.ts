@@ -1,5 +1,6 @@
 import { el } from "../dom";
 import { glossFor, lemmaFor, lookup, normalise, sensesFor } from "../content/dictionary";
+import type { WorkId } from "../content/types";
 
 const SHEET_MQ = "(max-width: 700px)";
 
@@ -17,10 +18,10 @@ export type DictPopupHandle = {
  * to the DOM. Returns a handle; the caller must call `destroy` to remove it and
  * its listeners.
  */
-export function createDictPopup(word: string, anchor: DOMRect): DictPopupHandle {
+export function createDictPopup(word: string, anchor: DOMRect, workId: WorkId = "gradibus"): DictPopupHandle {
   const sheet = isSheet();
   const key = normalise(word);
-  const entry = lookup(word);
+  const entry = lookup(word, workId);
 
   const panel = el("aside", {
     id: "dict",
@@ -36,7 +37,7 @@ export function createDictPopup(word: string, anchor: DOMRect): DictPopupHandle 
     const lemma = lemmaFor(entry);
     const pos = entry.edited?.pos ?? entry.senses?.[0]?.pos ?? entry.pos?.[0] ?? "";
     const extra = sensesFor(entry);
-    const count = entry.count != null ? `${entry.count}× in this treatise` : "";
+    const count = entry.count != null ? `${entry.count}× in this work` : "";
     const head = el("div", { className: "dict-head" },
       el("span", { className: "dict-word" }, entry.key),
       pos ? el("span", { className: "dict-pos" }, pos) : null,

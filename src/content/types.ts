@@ -1,3 +1,5 @@
+export type WorkId = "gradibus" | "rule";
+
 export type LangText = {
   la: string;
   en: string;
@@ -8,6 +10,7 @@ export type Passage = {
   n?: string;
   la: string;
   en: string;
+  /** Source citation without the work prefix, e.g. "941" or "7.1". */
   plColumn: string;
   facsimile: string | null;
   lacuna?: boolean;
@@ -17,6 +20,8 @@ export type Passage = {
 export type Chapter = {
   id: string;
   caput: string | null;
+  /** Short list label, e.g. "Cap. I", "Praef.", "Prol.". Derived if omitted. */
+  label?: string;
   title: LangText;
   plColumns: string;
   passages: Passage[];
@@ -35,10 +40,23 @@ export type SourceLeaf = {
   facsimile: string;
 };
 
-export type Work = {
+export type LectioStep = {
   id: string;
+  la: string;
+  en: string;
+  prompt: string;
+};
+
+export type Work = {
+  id: WorkId;
   title: LangText;
   author: LangText;
+  /** Short English lede for the work home page. */
+  lede: string;
+  /** Provenance of the Latin edition. */
+  edition?: string;
+  /** Citation prefix shown in the UI, e.g. "PL" or "RB". */
+  citePrefix: string;
   source: {
     latin: string;
     english: string;
@@ -46,9 +64,10 @@ export type Work = {
     missingColumns: string;
     leaves: SourceLeaf[];
     notes: string[];
+    missingFacsimileNote?: string;
   };
   lectio: {
-    steps: { id: string; la: string; en: string; prompt: string }[];
+    steps: LectioStep[];
   };
   parts: Part[];
 };
@@ -63,4 +82,15 @@ export function allPassages(work: Work): Passage[] {
 
 export function findChapter(work: Work, chapterId: string): Chapter | undefined {
   return allChapters(work).find((chapter) => chapter.id === chapterId);
+}
+
+export function chapterLabel(chapter: Chapter): string {
+  if (chapter.label) return chapter.label;
+  return chapter.caput ? `Cap. ${chapter.caput}` : "Praef.";
+}
+
+export function cite(work: Work, ref: string): string {
+  const body = ref.trim();
+  if (!body) return "";
+  return work.citePrefix ? `${work.citePrefix} ${body}` : body;
 }

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-PATH = Path("src/content/latin.md")
+PATH = Path("src/content/gradibus/latin.md")
 
 
 def convert_latin(text: str) -> str:

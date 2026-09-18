@@ -1,14 +1,17 @@
 import { el } from "../dom";
-import { work } from "../content/work";
+import { chapterLabel, cite } from "../content/types";
+import type { Work } from "../content/types";
+import { workHomePath, workLectioPath } from "../content/works";
+import { createMasthead } from "../components/Masthead";
+import { navigate } from "../nav";
 
-export function renderContents(): HTMLElement {
+export function renderContents(work: Work): HTMLElement {
   return el("div", { className: "shell" },
-    el("header", { className: "masthead" },
-      el("a", { className: "wordmark", href: "/" }, "Lectio"),
-      el("nav", { className: "mast-nav" },
-        el("a", { href: "/" }, "Home"),
-      ),
-    ),
+    createMasthead({
+      workId: work.id,
+      extra: [el("a", { href: workHomePath(work.id) }, "Home")],
+      onWorkChange: (id) => navigate(id ? workHomePath(id) : "/"),
+    }),
     ...work.parts.map((part) =>
       el("section", { className: "part" },
         el("p", { className: "kicker" }, part.title.en),
@@ -16,14 +19,16 @@ export function renderContents(): HTMLElement {
         el("ul", { className: "chapter-list" },
           ...part.chapters.map((chapter) =>
             el("li", null,
-              el("a", { href: `/lectio/${chapter.id}/0` },
-                el("span", { className: "num" }, chapter.caput ? `Cap. ${chapter.caput}` : "Praef."),
+              el("a", { href: workLectioPath(work.id, chapter.id, 0) },
+                el("span", { className: "num" }, chapterLabel(chapter)),
                 el("span", null,
                   el("strong", null, chapter.title.la),
                   el("br", null),
                   el("em", null, chapter.title.en),
                 ),
-                el("span", { className: "pl" }, `PL ${chapter.plColumns}`),
+                chapter.plColumns
+                  ? el("span", { className: "pl" }, cite(work, chapter.plColumns))
+                  : el("span", { className: "pl" }),
               ),
             ),
           ),

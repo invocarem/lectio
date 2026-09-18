@@ -9,12 +9,12 @@ Tracked files are `lexicon.json` (parsed dictionary the reader loads) and `overr
 ## Rebuild
 
 ```bash
-python3 tools/extract_wordlist.py   # src/content/latin.md → forms.json
-python3 tools/parse_analyses.py     # analyses.json → lexicon.json
-python3 tools/apply_overrides.py    # overrides.json → curated cards on lexicon.json
+python3 tools/extract_wordlist.py --work gradibus   # latin.md → forms.json
+python3 tools/parse_analyses.py --work gradibus     # analyses.json → lexicon.json
+python3 tools/apply_overrides.py --work gradibus    # overrides.json → curated cards
 ```
 
-`npm run lexicon:extract` / `lexicon:parse` / `lexicon:curate` are the same.
+`npm run lexicon:extract` / `lexicon:parse` / `lexicon:curate` are the same (they default to *De gradibus*).
 
 To rebuild `analyses.json` you need Docker and Whitaker's Words (see the humility repo's `services/whitaker-server/` and `tools/analyze-in-docker.sh`). This project keeps the already-parsed `lexicon.json` so the reader works without that image.
 

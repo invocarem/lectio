@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Turn Whitaker's raw batch output into a structured, reader-ready lexicon.
 
-Reads src/content/lexicon/analyses.json and writes src/content/lexicon/lexicon.json.
+Reads src/content/<work>/lexicon/analyses.json and writes lexicon.json.
 
 Usage:
     python tools/parse_analyses.py
+    python tools/parse_analyses.py --work rule
     python tools/parse_analyses.py --show
 """
 
@@ -16,7 +17,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-LEXDIR = ROOT / "src" / "content" / "lexicon"
+CONTENT = ROOT / "src" / "content"
 
 POS_TOKENS = (
     "VPAR",
@@ -148,11 +149,13 @@ def parse_entry(entry: dict) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--work", default="gradibus", help="work id (default: gradibus)")
     parser.add_argument("--show", action="store_true", help="print a compact summary")
     args = parser.parse_args()
 
-    src = LEXDIR / "analyses.json"
-    out = LEXDIR / "lexicon.json"
+    lexdir = CONTENT / args.work / "lexicon"
+    src = lexdir / "analyses.json"
+    out = lexdir / "lexicon.json"
     if not src.is_file():
         raise SystemExit(f"Missing {src.relative_to(ROOT)}. Rebuild analyses.json from Whitaker first.")
 

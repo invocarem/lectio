@@ -1,4 +1,6 @@
-import lexiconJson from "./lexicon/lexicon.json";
+import gradibusLexicon from "./gradibus/lexicon/lexicon.json";
+import ruleLexicon from "./rule/lexicon/lexicon.json";
+import type { WorkId } from "./types";
 
 export type Edited = {
   lemma?: string;
@@ -30,16 +32,35 @@ type LexiconPayload = {
   entries: Entry[];
 };
 
-const payload = lexiconJson as unknown as LexiconPayload;
+type WorkIndex = {
+  byKey: Map<string, Entry>;
+  byQuery: Map<string, Entry>;
+};
 
-const byKey = new Map<string, Entry>();
-const byQuery = new Map<string, Entry>();
-
-for (const entry of payload.entries) {
-  byKey.set(entry.key, entry);
-  if (entry.query && !byQuery.has(entry.query)) {
-    byQuery.set(entry.query, entry);
+function buildIndex(payload: LexiconPayload): WorkIndex {
+  const byKey = new Map<string, Entry>();
+  const byQuery = new Map<string, Entry>();
+  for (const entry of payload.entries) {
+    byKey.set(entry.key, entry);
+    if (entry.query && !byQuery.has(entry.query)) {
+      byQuery.set(entry.query, entry);
+    }
   }
+  return { byKey, byQuery };
+}
+
+/**
+ * Per-work lexicon registry. Add a work here once content/<work>/lexicon/lexicon.json
+ * exists; lookup then resolves clicks against that work only.
+ */
+const lexicons: Record<WorkId, LexiconPayload> = {
+  gradibus: gradibusLexicon as unknown as LexiconPayload,
+  rule: ruleLexicon as unknown as LexiconPayload,
+};
+
+const byWork = new Map<WorkId, WorkIndex>();
+for (const [workId, payload] of Object.entries(lexicons) as [WorkId, LexiconPayload][]) {
+  byWork.set(workId, buildIndex(payload));
 }
 
 /** Normalise a clicked token to a lexicon key (lowercase, punctuation stripped). */
@@ -73,9 +94,11 @@ function candidates(raw: string): string[] {
   return out;
 }
 
-export function lookup(raw: string): Entry | undefined {
+export function lookup(raw: string, workId: WorkId = "gradibus"): Entry | undefined {
+  const index = byWork.get(workId);
+  if (!index) return undefined;
   for (const key of candidates(raw)) {
-    const hit = byKey.get(key) ?? byQuery.get(key);
+    const hit = index.byKey.get(key) ?? index.byQuery.get(key);
     if (hit) return hit;
   }
   return undefined;

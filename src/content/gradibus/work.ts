@@ -1,10 +1,15 @@
 import latinMd from "./latin.md?raw";
 import englishMd from "./english.md?raw";
-import { assembleWork } from "./fromMarkdown";
-import type { Work } from "./types";
+import { assembleWork } from "../fromMarkdown";
+import { lectioSteps } from "../lectioSteps";
+import type { Work } from "../types";
 
-export const work: Work = assembleWork(latinMd, englishMd, {
-  id: "de-gradibus-humilitatis-et-superbiae",
+export const gradibus: Work = assembleWork(latinMd, englishMd, {
+  id: "gradibus",
+  lede:
+    "A quiet reader for Bernard of Clairvaux’s treatise on the twelve steps of humility and pride. The Latin is transcribed from the Migne pages you supplied; English sits beside it for meditation, not as a substitute recension. Click a Latin word for a gloss.",
+  citePrefix: "PL",
+  edition: "PL 182, coll. 941–972, with columns 945–946 supplied from the same Migne edition (Mabillon).",
   source: {
     latin:
       "Transcribed from the Migne Patrologia Latina scans in public/facsimiles, except PL 945–946, which have no leaf here and are supplied from the same Migne edition (Mabillon). Spelling is that printing with j respelt i (charitas, iam, iactantia).",
@@ -12,6 +17,8 @@ export const work: Work = assembleWork(latinMd, englishMd, {
       "Facing English is a translation of this Migne Latin, not of a later critical recension.",
     columnsPresent: "941–972",
     missingColumns: "",
+    missingFacsimileNote:
+      "Columns 945–946 have no leaf in this collection; the Latin is supplied from Migne.",
     leaves: [
       { columns: "941–942", pdf: "MLT_1-4", page: 1, facsimile: "pl-941-942.png" },
       { columns: "943–944", pdf: "MLT_1-4", page: 2, facsimile: "pl-943-944.png" },
@@ -37,33 +44,10 @@ export const work: Work = assembleWork(latinMd, englishMd, {
     ],
   },
   lectio: {
-    steps: [
-      {
-        id: "lectio",
-        la: "Lectio",
-        en: "Reading",
-        prompt: "Read the Latin slowly, even twice. Let a word or phrase stay with you.",
-      },
-      {
-        id: "meditatio",
-        la: "Meditatio",
-        en: "Meditation",
-        prompt: "Turn the phrase inward. Where does this step touch your own heart?",
-      },
-      {
-        id: "oratio",
-        la: "Oratio",
-        en: "Prayer",
-        prompt: "Speak to God from what the reading has uncovered.",
-      },
-      {
-        id: "contemplatio",
-        la: "Contemplatio",
-        en: "Contemplation",
-        prompt: "Rest. Do not force words. Remain before the Truth Bernard is seeking.",
-      },
-    ],
+    steps: lectioSteps.map((step) =>
+      step.id === "contemplatio"
+        ? { ...step, prompt: "Rest. Do not force words. Remain before the Truth Bernard is seeking." }
+        : step,
+    ),
   },
 });
-
-export default work;

@@ -28,6 +28,11 @@ describe("lookup", () => {
     expect(lookup("Charitas")?.key).toBe("charitas");
   });
 
+  it("looks the Rule up in its own lexicon", () => {
+    expect(lookup("Obsculta", "rule")?.key.toLowerCase()).toBe("obsculta");
+    expect(lookup("Obsculta", "gradibus")).toBeUndefined();
+  });
+
   it("bridges variant spellings through the query (caritas -> charitas)", () => {
     expect(lookup("caritas")?.key).toBe("charitas");
   });

@@ -1,25 +1,34 @@
 #!/usr/bin/env python3
-"""Merge curated Bernard gloss overrides into lexicon.json.
+"""Merge curated work gloss overrides into a work's lexicon.json.
 
-Reads src/content/lexicon/overrides.json and src/content/lexicon/lexicon.json,
-then writes lexicon.json back with an `edited` card on each matching entry.
+Reads src/content/<work>/lexicon/overrides.json and
+src/content/<work>/lexicon/lexicon.json, then writes lexicon.json back with
+an `edited` card on each matching entry.
 
-Re-running is idempotent: any existing `edited` field is first removed.
+Usage:
+    python tools/apply_overrides.py
+    python tools/apply_overrides.py --work rule
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-LEXDIR = ROOT / "src" / "content" / "lexicon"
+CONTENT = ROOT / "src" / "content"
 
 
 def main() -> None:
-    lex = json.loads((LEXDIR / "lexicon.json").read_text(encoding="utf-8"))
-    overrides = json.loads((LEXDIR / "overrides.json").read_text(encoding="utf-8"))["entries"]
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--work", default="gradibus", help="work id (default: gradibus)")
+    args = parser.parse_args()
+
+    lexdir = CONTENT / args.work / "lexicon"
+    lex = json.loads((lexdir / "lexicon.json").read_text(encoding="utf-8"))
+    overrides = json.loads((lexdir / "overrides.json").read_text(encoding="utf-8"))["entries"]
 
     entries = lex["entries"]
     by_key = {e["key"]: e for e in entries}
@@ -36,7 +45,7 @@ def main() -> None:
             applied += 1
 
     lex["curated_count"] = applied
-    (LEXDIR / "lexicon.json").write_text(
+    (lexdir / "lexicon.json").write_text(
         json.dumps(lex, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
 

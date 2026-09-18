@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { allChapters, allPassages, findChapter } from "./types";
+import { allChapters, allPassages, chapterLabel, cite, findChapter } from "./types";
 import type { Work } from "./types";
 
 const WORK: Work = {
-  id: "w",
+  id: "gradibus",
   title: { la: "T", en: "t" },
   author: { la: "A", en: "a" },
+  lede: "lede",
+  citePrefix: "PL",
   source: {
     latin: "",
     english: "",
@@ -93,3 +95,20 @@ describe("findChapter", () => {
     expect(findChapter(WORK, "nope")).toBeUndefined();
   });
 });
+
+describe("chapterLabel", () => {
+  it("uses Cap. plus the numeral when caput is set", () => {
+    expect(chapterLabel(WORK.parts[0].chapters[0])).toBe("Cap. I");
+  });
+
+  it("falls back to Praef. when there is no caput or label", () => {
+    expect(chapterLabel(WORK.parts[1].chapters[0])).toBe("Praef.");
+  });
+});
+
+describe("cite", () => {
+  it("prefixes the work citation", () => {
+    expect(cite(WORK, "941")).toBe("PL 941");
+  });
+});
+

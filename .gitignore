@@ -6,7 +6,7 @@ src/extracted
 .capacitor
 
 # Reproducible lexicon build artifact (regenerate with Whitaker)
-src/content/lexicon/analyses.json
+src/content/*/lexicon/analyses.json
 
 # Capacitor iOS (commit the Xcode project; skip generated copies)
 ios/App/Pods

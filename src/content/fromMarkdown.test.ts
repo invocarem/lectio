@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
   assembleWork,
@@ -84,7 +87,9 @@ const LEAVES: SourceLeaf[] = [
 ];
 
 const META: WorkMeta = {
-  id: "test-work",
+  id: "gradibus",
+  lede: "test",
+  citePrefix: "PL",
   source: {
     latin: "x",
     english: "y",
@@ -156,6 +161,31 @@ describe("facsimileFor", () => {
 
   it("returns null for columns with no leaf", () => {
     expect(facsimileFor("945", LEAVES)).toBeNull();
+  });
+});
+
+describe("De Gradibus source", () => {
+  const here = dirname(fileURLToPath(import.meta.url));
+  const latinMd = readFileSync(join(here, "gradibus/latin.md"), "utf8");
+  const englishMd = readFileSync(join(here, "gradibus/english.md"), "utf8");
+
+  const bernardNumbers = (markdown: string) =>
+    parseTreatiseMarkdown(markdown).parts.flatMap((part) =>
+      part.chapters.flatMap((chapter) =>
+        chapter.passages.flatMap((passage) =>
+          splitPassageBlocks(passage.text).flatMap((block) => (block.n ? [block.n] : [])),
+        ),
+      ),
+    );
+
+  it("marks Bernard’s 57 Migne sections in both languages, in order", () => {
+    const expected = Array.from({ length: 57 }, (_, i) => String(i + 1));
+    expect(bernardNumbers(latinMd)).toEqual(expected);
+    expect(bernardNumbers(englishMd)).toEqual(expected);
+  });
+
+  it("zips the real Latin and English treatises", () => {
+    expect(() => assembleWork(latinMd, englishMd, META)).not.toThrow();
   });
 });
 

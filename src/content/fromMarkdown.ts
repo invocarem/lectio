@@ -25,7 +25,7 @@ export type ParsedDoc = {
   parts: ParsedPart[];
 };
 
-export type WorkMeta = Pick<Work, "id" | "source" | "lectio">;
+export type WorkMeta = Pick<Work, "id" | "source" | "lectio" | "lede" | "citePrefix" | "edition">;
 
 const PASSAGE_HEADING = /^### (.+) \(PL (.+)\)$/;
 const BERNARD_SECTION = /^####\s+(\S+)\s*$/;

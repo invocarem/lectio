@@ -1,45 +1,86 @@
 import { el } from "../dom";
-import { work } from "../content/work";
-import { allPassages } from "../content/types";
+import { allPassages, findChapter } from "../content/types";
+import type { Work } from "../content/types";
+import { works, workContentsPath, workHomePath, workLectioPath } from "../content/works";
+import { createMasthead } from "../components/Masthead";
+import { navigate } from "../nav";
+import { readLastPosition } from "../lastPosition";
 
-export function renderHome(): HTMLElement {
-  const first = allPassages(work)[0];
-  const firstChapter = work.parts[0].chapters[0];
-  const beginPath = `/lectio/${firstChapter.id}/0`;
-
+export function renderLibrary(): HTMLElement {
   return el("div", { className: "shell" },
-    el("header", { className: "masthead" },
-      el("a", { className: "wordmark", href: "/" }, "Lectio"),
-      el("nav", { className: "mast-nav" },
-        el("a", { href: "/contents" }, "Contents"),
-        el("a", { href: beginPath }, "Begin"),
+    createMasthead({ onWorkChange: (id) => navigate(id ? workHomePath(id) : "/") }),
+    el("section", { className: "hero" },
+      el("p", { className: "kicker" }, "Library"),
+      el("h1", null, "Lectio"),
+      el("p", { className: "lede" },
+        "A quiet Latin reader. Choose a work; English sits beside the Latin for meditation. Click a Latin word for a gloss.",
       ),
     ),
+    el("ul", { className: "work-list" },
+      ...works.map((work) => {
+        const first = allPassages(work)[0];
+        const firstChapter = work.parts[0]?.chapters[0];
+        const beginPath = firstChapter
+          ? workLectioPath(work.id, firstChapter.id, 0)
+          : workHomePath(work.id);
+        return el("li", { className: "work-card" },
+          el("p", { className: "kicker" }, work.author.la),
+          el("h2", null, el("a", { href: workHomePath(work.id) }, work.title.la)),
+          el("p", { className: "author" }, work.title.en),
+          el("p", { className: "lede" }, work.lede),
+          el("p", { className: "meta" },
+            `${allPassages(work).length} passages · ${work.parts.flatMap((p) => p.chapters).length} chapters`,
+            first?.plColumn ? ` · ${work.citePrefix} ${first.plColumn}` : "",
+          ),
+          el("div", { className: "actions" },
+            el("a", { className: "btn", href: beginPath }, "Open the first passage"),
+            el("a", { className: "btn ghost", href: workContentsPath(work.id) }, "Browse chapters"),
+          ),
+        );
+      }),
+    ),
+  );
+}
+
+export function renderWorkHome(work: Work): HTMLElement {
+  const first = allPassages(work)[0];
+  const firstChapter = work.parts[0].chapters[0];
+  const beginPath = workLectioPath(work.id, firstChapter.id, 0);
+
+  const last = readLastPosition(work.id);
+  const lastChapter = last ? findChapter(work, last.chapterId) : undefined;
+  const resumePath =
+    last && lastChapter && lastChapter.passages[last.passageIndex]
+      ? workLectioPath(work.id, last.chapterId, last.passageIndex)
+      : null;
+
+  return el("div", { className: "shell" },
+    createMasthead({
+      workId: work.id,
+      extra: [
+        el("a", { href: workContentsPath(work.id) }, "Contents"),
+        el("a", { href: beginPath }, "Begin"),
+      ],
+      onWorkChange: (id) => navigate(id ? workHomePath(id) : "/"),
+    }),
     el("section", { className: "hero" },
       el("p", { className: "kicker" }, work.author.la),
       el("h1", null, work.title.la),
       el("p", { className: "author" }, work.title.en),
-      el("p", { className: "lede" },
-        "A quiet reader for Bernard of Clairvaux’s treatise on the twelve steps of humility and pride. The Latin is transcribed from the Migne pages you supplied; English sits beside it for meditation, not as a substitute recension. Click a Latin word for a gloss.",
-      ),
+      el("p", { className: "lede" }, work.lede),
       el("div", { className: "actions" },
         el("a", { className: "btn", href: beginPath }, "Open the first passage"),
-        el("a", { className: "btn ghost", href: "/contents" }, "Browse chapters"),
+        resumePath ? el("a", { className: "btn ghost", href: resumePath }, "Resume where you left off") : null,
+        el("a", { className: "btn ghost", href: workContentsPath(work.id) }, "Browse chapters"),
       ),
     ),
     el("section", { className: "notes" },
       el("p", null,
-        `${allPassages(work).length} passages across ${work.parts.flatMap((p) => p.chapters).length} chapters. First leaf: ${first.plColumn}.`,
+        `${allPassages(work).length} passages across ${work.parts.flatMap((p) => p.chapters).length} chapters.`,
+        first?.plColumn ? ` First passage: ${work.citePrefix} ${first.plColumn}.` : "",
       ),
+      work.edition ? el("p", null, work.edition) : null,
       el("ul", null, ...work.source.notes.map((note) => el("li", null, note))),
-      el("p", null,
-        "953–954: ",
-        el("code", null, "MLT_1-4"),
-        " page 3.",
-        work.source.missingColumns
-          ? ` Missing from the scans: columns ${work.source.missingColumns}.`
-          : " Columns 945–946 have no facsimile; the Latin is supplied from Migne.",
-      ),
     ),
   );
 }

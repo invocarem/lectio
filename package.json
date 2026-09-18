@@ -11,9 +11,9 @@
     "preview": "vite preview",
     "cap:sync": "npm run build && npx cap sync ios",
     "ios": "npm run cap:sync && npx cap open ios",
-    "lexicon:extract": "python3 tools/extract_wordlist.py",
-    "lexicon:parse": "python3 tools/parse_analyses.py",
-    "lexicon:curate": "python3 tools/apply_overrides.py"
+    "lexicon:extract": "python3 tools/extract_wordlist.py --work gradibus",
+    "lexicon:parse": "python3 tools/parse_analyses.py --work gradibus",
+    "lexicon:curate": "python3 tools/apply_overrides.py --work gradibus"
   },
   "dependencies": {
     "@capacitor/core": "^8.5.2",
