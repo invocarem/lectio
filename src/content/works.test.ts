@@ -28,4 +28,14 @@ describe("works registry", () => {
     expect(chapters[0].id).toBe("praefatio");
     expect(chapters.some((chapter) => chapter.id === "caput-i")).toBe(true);
   });
+
+  it("loads Caput I §1 from authored JSON segments", () => {
+    const chapter = allChapters(getWork("gradibus")).find((item) => item.id === "caput-i");
+    const passage = chapter?.passages[0];
+    expect(passage?.id).toBe("caput-i-1-941-942");
+    expect(passage?.segments).toHaveLength(5);
+    expect(passage?.facsimile).toBe("pl-941-942.png");
+    expect(passage?.la).toMatch(/^Locuturus ergo/);
+    expect(passage?.la).toContain("Haec est enim");
+  });
 });

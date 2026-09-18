@@ -5,6 +5,15 @@ export type LangText = {
   en: string;
 };
 
+/** One reading chunk: Latin and English are an authored 1:1 pair. */
+export type Segment = {
+  id: string;
+  la: string;
+  en: string;
+  /** Bernard section number from a `#### N` marker, shown as §N. */
+  n?: string;
+};
+
 export type Passage = {
   id: string;
   n?: string;
@@ -15,7 +24,17 @@ export type Passage = {
   facsimile: string | null;
   lacuna?: boolean;
   lacunaNote?: string;
+  /** Authored reading chunks. `la` / `en` on the passage are their concatenation. */
+  segments: Segment[];
 };
+
+export function concatSegments(segments: Segment[], lang: "la" | "en"): string {
+  return segments.map((segment) => segment[lang]).join(" ").replace(/ +/g, " ").trim();
+}
+
+export function asSegments(passageId: string, la: string, en: string, n?: string): Segment[] {
+  return [{ id: `${passageId}.1`, la, en, ...(n ? { n } : {}) }];
+}
 
 export type Chapter = {
   id: string;

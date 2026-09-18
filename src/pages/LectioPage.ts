@@ -1,7 +1,5 @@
 import { el, clear } from "../dom";
-import { allChapters, chapterLabel, cite, findChapter } from "../content/types";
-import type { Work } from "../content/types";
-import { splitPassageBlocks } from "../content/fromMarkdown";
+import { allChapters, chapterLabel, cite, findChapter, type Segment, type Work } from "../content/types";
 import { createLatinText, latinWordCount } from "../components/LatinText";
 import { createDictPopup } from "../components/DictPopup";
 import { createSourceLeaf } from "../components/SourceLeaf";
@@ -40,6 +38,11 @@ function listSequence(work: Work) {
   );
 }
 
+/** Keep chapter-picker options from inflating the masthead; titles stay full in Contents. */
+function shortTitle(s: string): string {
+  return s.length > 26 ? `${s.slice(0, 26).trimEnd()}…` : s;
+}
+
 export function renderLectio(work: Work, chapterId: string, passageIndex: number): HTMLElement | null {
   const chapter = findChapter(work, chapterId);
   if (!chapter) return null;
@@ -64,6 +67,7 @@ export function renderLectio(work: Work, chapterId: string, passageIndex: number
   saveLastPosition(work.id, ch.id, index);
 
   const chapterSelect = el("select", {
+    className: "chapter-pick",
     "aria-label": "Chapter",
     onChange: (event: Event) => {
       const target = event.target as HTMLSelectElement;
@@ -71,21 +75,22 @@ export function renderLectio(work: Work, chapterId: string, passageIndex: number
     },
   }, ...allChapters(work).map((item) =>
     el("option", { value: item.id },
-      `${chapterLabel(item)} — ${item.title.en}`,
+      `${chapterLabel(item)} — ${shortTitle(item.title.en)}`,
     ),
   ));
   chapterSelect.value = ch.id;
 
   const readerEl = el("div", { className: "reader" });
 
+  /** Reading chunks in this passage, in display order; reset per render. */
+  let subRows: HTMLElement[] = [];
+  let activeSub = 0;
+
   function currentStep() {
     return work.lectio.steps.find((item) => item.id === stepId) ?? work.lectio.steps[0];
   }
 
   function buildArticle(): HTMLElement {
-    const laBlocks = splitPassageBlocks(passage.la);
-    const enBlocks = splitPassageBlocks(passage.en);
-
     const stepsEl = el("div", { className: "steps" },
       ...work.lectio.steps.map((item) =>
         el("button", {
@@ -131,38 +136,79 @@ export function renderLectio(work: Work, chapterId: string, passageIndex: number
       passageEl.append(el("p", { className: "lacuna-note" }, passage.lacunaNote));
     }
 
+    const segments: Segment[] = passage.segments.length
+      ? passage.segments
+      : [{ id: `${passage.id}.1`, la: passage.la, en: passage.en }];
+    const subdivided = segments.length > 1;
+    subRows = [];
+
     if (mode !== "en") {
       const pageLa = el("div", { className: "page page-la" });
       if (mode === "both") pageLa.append(el("p", { className: "col-label" }, "Latina"));
+      const blockEl = el("div", { className: "block" });
       let wordOffset = 0;
-      laBlocks.forEach((block) => {
-        const blockEl = el("div", { className: "block" });
-        const handle = createLatinText(block.text, {
+      segments.forEach((segment, si) => {
+        const handle = createLatinText(segment.la, {
           indexOffset: wordOffset,
           onSelect: (hit) => openDict(hit.word, hit.element),
         });
-        prependSectionNumber(handle.element, block.n);
-        blockEl.append(handle.element);
-        pageLa.append(blockEl);
-        wordOffset += latinWordCount(block.text);
+        prependSectionNumber(handle.element, segment.n);
+        if (subdivided) {
+          const rowEl = el("span", { className: `sub${si === activeSub ? " active" : ""}` });
+          rowEl.append(handle.element);
+          blockEl.append(rowEl);
+          subRows.push(rowEl);
+        } else {
+          blockEl.append(handle.element);
+        }
+        wordOffset += latinWordCount(segment.la);
       });
+      pageLa.append(blockEl);
       passageEl.append(pageLa);
     }
 
     if (mode !== "la") {
       const pageEn = el("div", { className: "page page-en" });
       if (mode === "both") pageEn.append(el("p", { className: "col-label" }, "English"));
-      enBlocks.forEach((block) => {
-        const blockEl = el("div", { className: "block" });
-        const paragraph = el("p", { className: "english" }, block.text);
-        prependSectionNumber(paragraph, block.n);
-        blockEl.append(paragraph);
-        pageEn.append(blockEl);
+      const blockEl = el("div", { className: "block" });
+      segments.forEach((segment, si) => {
+        const paragraph = el("p", { className: "english" }, segment.en);
+        prependSectionNumber(paragraph, segment.n);
+        if (subdivided) {
+          const rowEl = el("span", { className: `sub sub-en${si === activeSub ? " active" : ""}` });
+          rowEl.append(paragraph);
+          blockEl.append(rowEl);
+          if (mode === "en") subRows.push(rowEl);
+        } else {
+          blockEl.append(paragraph);
+        }
       });
+      pageEn.append(blockEl);
       passageEl.append(pageEn);
     }
 
     const leaf = createSourceLeaf(passage.facsimile, work);
+
+    const subNav =
+      subdivided && subRows.length > 1
+        ? el("div", { className: "sub-nav" },
+            el("button", {
+              type: "button",
+              className: "sub-prev",
+              "aria-label": "Previous reading step",
+              disabled: activeSub === 0,
+              onClick: () => focusSub(activeSub - 1),
+            }, "← Prev"),
+            el("span", { className: "sub-count" }, `${activeSub + 1} / ${subRows.length}`),
+            el("button", {
+              type: "button",
+              className: "sub-next",
+              "aria-label": "Next reading step",
+              disabled: activeSub === subRows.length - 1,
+              onClick: () => focusSub(activeSub + 1),
+            }, "Next →"),
+          )
+        : null;
 
     return el("article", null,
       el("p", { className: "meta" },
@@ -176,6 +222,7 @@ export function renderLectio(work: Work, chapterId: string, passageIndex: number
       promptEl,
       toolbar,
       passageEl,
+      subNav,
       leaf,
       el("nav", { className: "nav-passages" },
         prev
@@ -186,6 +233,20 @@ export function renderLectio(work: Work, chapterId: string, passageIndex: number
           : el("span", null, "End of this work"),
       ),
     );
+  }
+
+  /** Move the active reading chunk, rebuild, and bring it into view. */
+  function focusSub(next: number) {
+    const n = subRows.length;
+    if (n <= 1) return;
+    const target = Math.max(0, Math.min(next, n - 1));
+    if (target === activeSub) return;
+    activeSub = target;
+    renderArticle();
+    const row = subRows[activeSub];
+    if (row) {
+      requestAnimationFrame(() => row.scrollIntoView({ block: "center", behavior: "smooth" }));
+    }
   }
 
   function renderArticle() {

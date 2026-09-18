@@ -35,6 +35,7 @@ const WORK: Work = {
               en: "en",
               plColumn: "941",
               facsimile: null,
+              segments: [{ id: "p1a.1", la: "la", en: "en" }],
             },
           ],
         },
@@ -57,6 +58,7 @@ const WORK: Work = {
               en: "en",
               plColumn: "942",
               facsimile: "pl-942.png",
+              segments: [{ id: "p2a.1", la: "la", en: "en" }],
             },
             {
               id: "p2b",
@@ -65,6 +67,7 @@ const WORK: Work = {
               en: "en",
               plColumn: "942",
               facsimile: null,
+              segments: [{ id: "p2b.1", la: "la", en: "en" }],
             },
           ],
         },

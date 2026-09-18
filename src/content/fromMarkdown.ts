@@ -1,4 +1,4 @@
-import type { Chapter, Part, Passage, SourceLeaf, Work } from "./types";
+import { concatSegments, type Chapter, type Part, type Passage, type Segment, type SourceLeaf, type Work } from "./types";
 
 export type ParsedPassage = {
   n: string;
@@ -37,6 +37,15 @@ export type PassageBlock = {
   n?: string;
   text: string;
 };
+
+/** Drop standalone `§52` marker lines produced from `#### 52`. */
+export function stripSectionMarks(text: string): string {
+  return text
+    .split("\n")
+    .filter((line) => !/^§\S+\s*$/.test(line.trim()))
+    .join("\n")
+    .trim();
+}
 
 /** Split stored passage text on `§52` markers produced from `#### 52`. */
 export function splitPassageBlocks(text: string): PassageBlock[] {
@@ -223,6 +232,26 @@ export function facsimileFor(plColumn: string, leaves: SourceLeaf[]): string | n
   return null;
 }
 
+/** One segment per `#### N` block (or a single segment when there are none). */
+export function zipSegments(passageId: string, laText: string, enText: string): Segment[] {
+  const laBlocks = splitPassageBlocks(laText);
+  const enBlocks = splitPassageBlocks(enText);
+  const count = Math.max(laBlocks.length, enBlocks.length, 1);
+  const segments: Segment[] = [];
+  for (let i = 0; i < count; i++) {
+    const laBlock = laBlocks[i];
+    const enBlock = enBlocks[i];
+    const n = laBlock?.n ?? enBlock?.n;
+    segments.push({
+      id: `${passageId}.${i + 1}`,
+      la: stripSectionMarks(laBlock?.text ?? ""),
+      en: stripSectionMarks(enBlock?.text ?? ""),
+      ...(n ? { n } : {}),
+    });
+  }
+  return segments;
+}
+
 function zipPassages(
   chapterId: string,
   latin: ParsedPassage[],
@@ -237,13 +266,16 @@ function zipPassages(
     if (la.plColumn !== en.plColumn) {
       throw new Error(`${chapterId} passage ${index} PL mismatch: ${la.plColumn} vs ${en.plColumn}.`);
     }
+    const id = passageId(chapterId, la, index);
+    const segments = zipSegments(id, la.text, en.text);
     return {
-      id: passageId(chapterId, la, index),
+      id,
       n: la.n,
       plColumn: la.plColumn,
       facsimile: facsimileFor(la.plColumn, leaves),
-      la: la.text,
-      en: en.text,
+      la: concatSegments(segments, "la"),
+      en: concatSegments(segments, "en"),
+      segments,
       ...(la.lacunaNote || en.lacunaNote
         ? { lacuna: true, lacunaNote: en.lacunaNote ?? la.lacunaNote }
         : {}),

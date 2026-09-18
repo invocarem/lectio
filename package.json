@@ -6,14 +6,16 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "vitest run --pool=vmForks",
+    "test:watch": "vitest --pool=vmForks",
     "preview": "vite preview",
     "cap:sync": "npm run build && npx cap sync ios",
     "ios": "npm run cap:sync && npx cap open ios",
     "lexicon:extract": "python3 tools/extract_wordlist.py --work gradibus",
     "lexicon:parse": "python3 tools/parse_analyses.py --work gradibus",
-    "lexicon:curate": "python3 tools/apply_overrides.py --work gradibus"
+    "lexicon:curate": "python3 tools/apply_overrides.py --work gradibus",
+    "content:scaffold": "tsx tools/md_to_work_json.ts --scaffold",
+    "content:verify": "tsx tools/md_to_work_json.ts --verify"
   },
   "dependencies": {
     "@capacitor/core": "^8.5.2",
@@ -26,6 +28,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.2",
+    "tsx": "^4.20.5",
     "typescript": "^5.9.2",
     "vite": "^7.1.5",
     "vitest": "^5.0.1"

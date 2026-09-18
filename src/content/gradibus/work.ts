@@ -1,10 +1,9 @@
-import latinMd from "./latin.md?raw";
-import englishMd from "./english.md?raw";
-import { assembleWork } from "../fromMarkdown";
+import text from "./work.json";
+import { hydrateWorkText, type WorkText } from "../workText";
 import { lectioSteps } from "../lectioSteps";
 import type { Work } from "../types";
 
-export const gradibus: Work = assembleWork(latinMd, englishMd, {
+export const gradibus: Work = hydrateWorkText(text as WorkText, {
   id: "gradibus",
   lede:
     "A quiet reader for Bernard of Clairvaux’s treatise on the twelve steps of humility and pride. The Latin is transcribed from the Migne pages you supplied; English sits beside it for meditation, not as a substitute recension. Click a Latin word for a gloss.",

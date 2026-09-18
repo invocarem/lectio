@@ -7,6 +7,7 @@ import {
   facsimileFor,
   parseTreatiseMarkdown,
   splitPassageBlocks,
+  stripSectionMarks,
   type WorkMeta,
 } from "./fromMarkdown";
 import type { SourceLeaf } from "./types";
@@ -126,6 +127,12 @@ describe("parseTreatiseMarkdown", () => {
 
   it("throws on a chapter heading before any part", () => {
     expect(() => parseTreatiseMarkdown("# T\n\nA\n\nS\n\n## C\n")).toThrow(/before a part/);
+  });
+});
+
+describe("stripSectionMarks", () => {
+  it("drops standalone Bernard section lines", () => {
+    expect(stripSectionMarks("§1\n\nLocuturus ergo.")).toBe("Locuturus ergo.");
   });
 });
 

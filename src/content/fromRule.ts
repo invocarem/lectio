@@ -1,4 +1,4 @@
-import type { Chapter, Passage } from "./types";
+import { asSegments, concatSegments, type Chapter, type Passage } from "./types";
 
 export type ParsedRuleParagraph = {
   n: string;
@@ -123,13 +123,17 @@ export function assembleRuleChapters(latinMarkdown: string, rendering: RuleRende
     const englishParas = rendering.chapters[key] ?? {};
     const passages: Passage[] = parsed.paragraphs.map((para) => {
       const cite = parsed.number === undefined ? `Prol. ${para.n}` : `${parsed.number}.${para.n}`;
+      const id = `${chapterId(parsed)}:${para.n}`;
+      const en = englishParas[para.n] ?? "";
+      const segments = asSegments(id, para.text, en);
       return {
-        id: `${chapterId(parsed)}:${para.n}`,
+        id,
         n: para.n,
-        la: para.text,
-        en: englishParas[para.n] ?? "",
+        la: concatSegments(segments, "la"),
+        en: concatSegments(segments, "en"),
         plColumn: cite,
         facsimile: null,
+        segments,
       };
     });
     return {

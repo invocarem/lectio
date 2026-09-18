@@ -96,6 +96,30 @@ select {
   padding: 0.3rem 0.45rem;
 }
 
+/* Chapter picker in the lectio masthead. Capped so a long English title
+   (e.g. De gradibus Caput V) cannot inflate the control past the screen. */
+.mast-nav .chapter-pick {
+  font: inherit;
+  letter-spacing: 0;
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  background: #fffaf1;
+  padding: 0.3rem 0.45rem;
+  max-width: min(26rem, 72vw);
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mast-nav {
+  min-width: 0;
+}
+
+.work-pick,
+.mast-nav a {
+  white-space: nowrap;
+}
+
 .work-list {
   list-style: none;
   padding: 0;
@@ -322,6 +346,70 @@ h3 {
 
 .block + .block {
   margin-top: 1.15rem;
+}
+
+/* Sentence-grouped reading chunks (only used when a passage is subdivided).
+   They flow inline — one continuous paragraph with no line break between
+   steps — so stepping through reads like a natural sentence sequence. */
+.sub {
+  display: inline;
+  padding: 0.1em 0.15em;
+  margin: 0;
+  border-radius: 3px;
+  transition: background 0.18s ease;
+}
+
+.sub .latin {
+  display: inline;
+  margin: 0;
+}
+
+.sub .english {
+  display: inline;
+  margin: 0;
+  font-style: normal;
+}
+
+.sub + .sub {
+  margin-left: 0.3em;
+}
+
+.sub.active {
+  background: color-mix(in srgb, #f0d48a 45%, transparent);
+}
+
+.sub-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  margin-top: 1.5rem;
+}
+
+.sub-nav button {
+  font: inherit;
+  border: 1px solid var(--rule);
+  background: #fffaf1;
+  color: var(--ink);
+  padding: 0.35rem 0.9rem;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+}
+
+.sub-nav button:hover:not(:disabled) {
+  border-color: var(--ink);
+}
+
+.sub-nav button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.sub-nav .sub-count {
+  color: var(--gilt);
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  font-variant-numeric: tabular-nums;
 }
 
 .bernard-n {
