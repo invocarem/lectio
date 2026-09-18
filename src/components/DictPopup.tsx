@@ -1,5 +1,7 @@
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { glossFor, lemmaFor, lookup, normalise, sensesFor } from "../content/dictionary";
+
+const SHEET_MQ = "(max-width: 700px)";
 
 type Props = {
   word: string;
@@ -7,14 +9,37 @@ type Props = {
   onClose: () => void;
 };
 
+function useSheet(): boolean {
+  const [sheet, setSheet] = useState(
+    () => typeof window !== "undefined" && window.matchMedia(SHEET_MQ).matches,
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia(SHEET_MQ);
+    const onChange = () => setSheet(mq.matches);
+    onChange();
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  return sheet;
+}
+
 export function DictPopup({ word, anchor, onClose }: Props) {
   const elRef = useRef<HTMLElement>(null);
+  const sheet = useSheet();
   const key = normalise(word);
   const entry = lookup(word);
 
   useLayoutEffect(() => {
     const el = elRef.current;
     if (!el) return;
+    if (sheet) {
+      el.style.width = "";
+      el.style.left = "";
+      el.style.top = "";
+      return;
+    }
     const margin = 10;
     const width = Math.min(360, window.innerWidth - margin * 2);
     let left = Math.max(margin, Math.min(anchor.left, window.innerWidth - width - margin));
@@ -26,7 +51,7 @@ export function DictPopup({ word, anchor, onClose }: Props) {
     el.style.width = `${width}px`;
     el.style.left = `${left}px`;
     el.style.top = `${top}px`;
-  }, [anchor, word, entry]);
+  }, [anchor, word, entry, sheet]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -37,16 +62,22 @@ export function DictPopup({ word, anchor, onClose }: Props) {
       if (target?.closest("#dict") || target?.closest(".w")) return;
       onClose();
     };
-    const onScroll = () => onClose();
     document.addEventListener("keydown", onKey);
     document.addEventListener("click", onClick);
-    window.addEventListener("scroll", onScroll, true);
+    if (!sheet) {
+      const onScroll = () => onClose();
+      window.addEventListener("scroll", onScroll, true);
+      return () => {
+        document.removeEventListener("keydown", onKey);
+        document.removeEventListener("click", onClick);
+        window.removeEventListener("scroll", onScroll, true);
+      };
+    }
     return () => {
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("click", onClick);
-      window.removeEventListener("scroll", onScroll, true);
     };
-  }, [onClose]);
+  }, [onClose, sheet]);
 
   let body;
   if (!entry) {
@@ -86,11 +117,21 @@ export function DictPopup({ word, anchor, onClose }: Props) {
   }
 
   return (
-    <aside className="dict" id="dict" ref={elRef} role="dialog" aria-label={`Gloss for ${word}`}>
-      <button className="dict-close" type="button" onClick={onClose} aria-label="Close glossary">
-        ×
-      </button>
-      {body}
-    </aside>
+    <>
+      {sheet ? <div className="dict-backdrop" onClick={onClose} /> : null}
+      <aside
+        className={sheet ? "dict dict-sheet" : "dict"}
+        id="dict"
+        ref={elRef}
+        role="dialog"
+        aria-label={`Gloss for ${word}`}
+      >
+        {sheet ? <div className="dict-handle" aria-hidden="true" /> : null}
+        <button className="dict-close" type="button" onClick={onClose} aria-label="Close glossary">
+          ×
+        </button>
+        {body}
+      </aside>
+    </>
   );
 }

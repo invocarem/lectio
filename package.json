@@ -7,11 +7,16 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
+    "cap:sync": "npm run build && npx cap sync ios",
     "lexicon:extract": "python3 tools/extract_wordlist.py",
     "lexicon:parse": "python3 tools/parse_analyses.py",
     "lexicon:curate": "python3 tools/apply_overrides.py"
   },
   "dependencies": {
+    "@capacitor/core": "^8.5.2",
+    "@capacitor/ios": "^8.5.2",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.3",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.8.2"
