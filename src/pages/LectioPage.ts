@@ -17,12 +17,47 @@ let activeDict: { destroy: () => void } | null = null;
 let activeWordEl: HTMLElement | null = null;
 let activeWork: Work | null = null;
 
+/** Arrow-key targets for the current passage, refreshed each render. */
+let lectioNavPrev: string | null = null;
+let lectioNavNext: string | null = null;
+let arrowHandler: ((e: KeyboardEvent) => void) | null = null;
+
 /** Reset view state when leaving the lectio route (mirrors React unmount). */
 export function resetLectioState(): void {
   mode = "both";
   stepId = "";
   activeWork = null;
+  lectioNavPrev = null;
+  lectioNavNext = null;
+  if (arrowHandler) {
+    document.removeEventListener("keydown", arrowHandler);
+    arrowHandler = null;
+  }
   closeDict();
+}
+
+/** ← / → jump between passages. Ignored while typing in a form control. */
+function attachArrowNav(): void {
+  if (arrowHandler) return;
+  arrowHandler = (e: KeyboardEvent) => {
+    const target = e.target as HTMLElement | null;
+    if (
+      target &&
+      (target.tagName === "INPUT" ||
+        target.tagName === "SELECT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable)
+    ) {
+      return;
+    }
+    const dest =
+      e.key === "ArrowLeft" ? lectioNavPrev : e.key === "ArrowRight" ? lectioNavNext : null;
+    if (dest) {
+      e.preventDefault();
+      navigate(dest);
+    }
+  };
+  document.addEventListener("keydown", arrowHandler);
 }
 
 function closeDict(): void {
@@ -63,6 +98,10 @@ export function renderLectio(work: Work, chapterId: string, passageIndex: number
   const prev = sequence[globalIndex - 1];
   const next = sequence[globalIndex + 1];
   const progress = ((globalIndex + 1) / sequence.length) * 100;
+
+  lectioNavPrev = prev ? workLectioPath(work.id, prev.chapterId, prev.passageIdx) : null;
+  lectioNavNext = next ? workLectioPath(work.id, next.chapterId, next.passageIdx) : null;
+  attachArrowNav();
 
   saveLastPosition(work.id, ch.id, index);
 
@@ -122,9 +161,6 @@ export function renderLectio(work: Work, chapterId: string, passageIndex: number
     const toolbar = el("div", { className: "toolbar" },
       el("label", null, "View ", modeSelect),
       el("span", null, `Passage ${globalIndex + 1} of ${sequence.length}`),
-      mode !== "en"
-        ? el("span", { className: "hint" }, "Click a Latin word for a gloss.")
-        : el("span", null),
     );
 
     const passageEl = el("div", {
@@ -142,6 +178,28 @@ export function renderLectio(work: Work, chapterId: string, passageIndex: number
     const subdivided = segments.length > 1;
     subRows = [];
 
+    /** Small numbered chip at the start of each reading chunk; click to jump. */
+    function stepMarker(si: number): HTMLElement {
+      const active = si === activeSub;
+      return el("button", {
+        type: "button",
+        className: `sub-marker${active ? " active" : ""}`,
+        "aria-label": `Reading step ${si + 1} of ${segments.length}`,
+        "aria-pressed": active,
+        onClick: (event: MouseEvent) => {
+          event.stopPropagation();
+          focusSub(si);
+        },
+        onKeyDown: (event: KeyboardEvent) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            event.stopPropagation();
+            focusSub(si);
+          }
+        },
+      }, String(si + 1));
+    }
+
     if (mode !== "en") {
       const pageLa = el("div", { className: "page page-la" });
       if (mode === "both") pageLa.append(el("p", { className: "col-label" }, "Latina"));
@@ -155,6 +213,7 @@ export function renderLectio(work: Work, chapterId: string, passageIndex: number
         prependSectionNumber(handle.element, segment.n);
         if (subdivided) {
           const rowEl = el("span", { className: `sub${si === activeSub ? " active" : ""}` });
+          rowEl.append(stepMarker(si));
           rowEl.append(handle.element);
           blockEl.append(rowEl);
           subRows.push(rowEl);
@@ -176,6 +235,7 @@ export function renderLectio(work: Work, chapterId: string, passageIndex: number
         prependSectionNumber(paragraph, segment.n);
         if (subdivided) {
           const rowEl = el("span", { className: `sub sub-en${si === activeSub ? " active" : ""}` });
+          rowEl.append(stepMarker(si));
           rowEl.append(paragraph);
           blockEl.append(rowEl);
           if (mode === "en") subRows.push(rowEl);

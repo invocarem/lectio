@@ -4,6 +4,8 @@ src/extracted
 *.local
 .DS_Store
 .capacitor
+__pycache__/
+*.pyc
 
 # Reproducible lexicon build artifact (regenerate with Whitaker)
 src/content/*/lexicon/analyses.json
