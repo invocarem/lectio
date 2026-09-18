@@ -10,7 +10,10 @@ import "@fontsource/source-sans-3/400-italic.css";
 import "@fontsource/inconsolata/400.css";
 import { initNative } from "./native";
 import { initRouter } from "./router";
+import { applyTheme } from "./theme";
 import "./index.css";
 
+// Stamp the resolved theme before the first paint/route render.
+applyTheme();
 void initNative();
 initRouter();

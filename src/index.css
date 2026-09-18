@@ -1,4 +1,5 @@
 :root {
+  /* Core palette — parchment / old-manuscript light theme (the default). */
   --ink: #1c1710;
   --ink-soft: #4a4033;
   --rule: #cbbca6;
@@ -7,7 +8,43 @@
   --gilt: #8a6a32;
   --blood: #6e2e24;
   --shadow: rgba(40, 28, 12, 0.12);
+
+  /* Derived surfaces, routed through variables so the dark theme can
+     override them consistently. */
+  --flare: #fff6e6;        /* warm glow behind the page */
+  --field: #fffaf1;        /* control backgrounds (selects, buttons, markers) */
+  --pop: #fffdf6;          /* elevated surfaces (dict popup) */
+  --figure-bg: #fff;       /* backdrop behind page-scan figures */
+  --lacuna: #efe2cc;       /* lacuna box background */
+  --glow: #f0d48a;         /* gold used by active-word highlights */
+  --glow-edge: #c9a227;    /* underline edge of the active highlight */
+  --curated-fg: #14532d;   /* curated tag text */
+  --curated-bg: #dcfce7;   /* curated tag background */
 }
+
+/* Dark parchment / night reading theme. Driven by <html data-theme="dark">,
+   which the theme module sets from the saved preference (defaulting to the
+   OS setting via prefers-color-scheme) or from the manual toggle. */
+:root[data-theme="dark"] {
+    --ink: #e8dcc3;
+    --ink-soft: #b3a58b;
+    --rule: #4a3e2c;
+    --paper: #16110a;
+    --paper-deep: #241c11;
+    --gilt: #c6a65a;
+    --blood: #d08a6c;
+    --shadow: rgba(0, 0, 0, 0.55);
+
+    --flare: #2a2113;
+    --field: #20190f;
+    --pop: #241d12;
+    --figure-bg: #0f0c07;
+    --lacuna: #251d11;
+    --glow: #8a6a32;
+    --glow-edge: #6b521f;
+    --curated-fg: #86efac;
+    --curated-bg: #143d23;
+  }
 
 * {
   box-sizing: border-box;
@@ -23,7 +60,7 @@ body {
   margin: 0;
   color: var(--ink);
   background:
-    radial-gradient(1200px 600px at 50% -10%, #fff6e6 0%, transparent 55%),
+    radial-gradient(1200px 600px at 50% -10%, var(--flare) 0%, transparent 55%),
     var(--paper);
   font-family: "Source Sans 3", "Segoe UI", sans-serif;
 }
@@ -92,7 +129,7 @@ select {
   letter-spacing: 0;
   color: var(--ink);
   border: 1px solid var(--rule);
-  background: #fffaf1;
+  background: var(--field);
   padding: 0.3rem 0.45rem;
 }
 
@@ -103,7 +140,7 @@ select {
   letter-spacing: 0;
   color: var(--ink);
   border: 1px solid var(--rule);
-  background: #fffaf1;
+  background: var(--field);
   padding: 0.3rem 0.45rem;
   max-width: min(26rem, 72vw);
   min-width: 0;
@@ -118,6 +155,24 @@ select {
 .work-pick,
 .mast-nav a {
   white-space: nowrap;
+}
+
+.theme-toggle {
+  font: inherit;
+  line-height: 1;
+  border: 1px solid var(--rule);
+  background: var(--field);
+  color: var(--ink);
+  padding: 0.35rem 0.55rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1.05rem;
+  flex: none;
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
+  border-color: var(--ink);
 }
 
 .work-list {
@@ -296,7 +351,7 @@ h3 {
 .toolbar select,
 .step-btn {
   border: 1px solid var(--rule);
-  background: #fffaf1;
+  background: var(--field);
   padding: 0.35rem 0.55rem;
 }
 
@@ -370,7 +425,7 @@ h3 {
 }
 
 .sub.active {
-  background: color-mix(in srgb, #f0d48a 45%, transparent);
+  background: color-mix(in srgb, var(--glow) 45%, transparent);
 }
 
 /* Small numbered chip at the start of each reading chunk; click to jump the
@@ -388,7 +443,7 @@ h3 {
   font-weight: 600;
   line-height: 1;
   color: var(--gilt);
-  background: #fffaf1;
+  background: var(--field);
   border: 1px solid var(--rule);
   border-radius: 50%;
   cursor: pointer;
@@ -418,7 +473,7 @@ h3 {
 .sub-nav button {
   font: inherit;
   border: 1px solid var(--rule);
-  background: #fffaf1;
+  background: var(--field);
   color: var(--ink);
   padding: 0.35rem 0.9rem;
   cursor: pointer;
@@ -456,7 +511,7 @@ h3 {
 }
 
 .lacuna {
-  background: #efe2cc;
+  background: var(--lacuna);
   border: 1px dashed var(--gilt);
   padding: 1rem 1.1rem;
 }
@@ -543,7 +598,7 @@ h3 {
   width: 100%;
   height: auto;
   border: 1px solid var(--rule);
-  background: #fff;
+  background: var(--figure-bg);
 }
 
 .leaf-figure figcaption {
@@ -600,18 +655,18 @@ h3 {
 }
 
 .w:hover {
-  background: color-mix(in srgb, #f0d48a 55%, transparent);
+  background: color-mix(in srgb, var(--glow) 55%, transparent);
 }
 
 .w.active {
-  background: color-mix(in srgb, #f0d48a 85%, transparent);
-  box-shadow: inset 0 -1px 0 #c9a227;
+  background: color-mix(in srgb, var(--glow) 85%, transparent);
+  box-shadow: inset 0 -1px 0 var(--glow-edge);
 }
 
 .dict {
   position: fixed;
   z-index: 40;
-  background: #fffdf6;
+  background: var(--pop);
   border: 1px solid var(--rule);
   border-radius: 8px;
   box-shadow: 0 10px 30px var(--shadow);
@@ -659,8 +714,8 @@ h3 {
   font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #14532d;
-  background: #dcfce7;
+  color: var(--curated-fg);
+  background: var(--curated-bg);
   border-radius: 3px;
   padding: 0.05rem 0.35rem;
 }
