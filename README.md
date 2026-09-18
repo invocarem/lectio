@@ -1,6 +1,6 @@
 # Lectio
 
-A React reader for St. Bernard of Clairvaux, *De Gradibus Humilitatis et Superbiae Tractatus*. Latin is transcribed from the supplied Migne PL 182 page images; English sits beside it as a translation of that Latin, not of a later critical recension.
+A reader for St. Bernard of Clairvaux, *De Gradibus Humilitatis et Superbiae Tractatus*, written in vanilla TypeScript (no framework). Latin is transcribed from the supplied Migne PL 182 page images; English sits beside it as a translation of that Latin, not of a later critical recension.
 
 ## Run
 
@@ -20,6 +20,13 @@ On a lectio page, click a **Latin word** for this treatise’s closed lexicon (a
 | `/lectio/:chapterId/:passageIndex` | Facing Latin / English, with lectio divina prompts |
 
 `npm run build` type-checks and builds a static bundle. `npm run preview` serves that bundle.
+
+## Architecture
+
+- `src/main.ts` boots the app and `src/router.ts` handles the routes above (history-based, no router library).
+- Each page (`src/pages/HomePage.ts`, `ContentsPage.ts`, `LectioPage.ts`) is a plain function that builds its DOM with the tiny `src/dom.ts` helper.
+- `src/components/LatinText.ts` and `DictPopup.ts` render the clickable words and the glossary popup.
+- There is no framework: state in the lectio view is kept in module scope and the article region is re-rendered directly.
 
 ## Text
 

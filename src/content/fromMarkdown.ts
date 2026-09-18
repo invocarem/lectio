@@ -191,12 +191,32 @@ function columnNumbers(label: string): number[] {
   return [...label.matchAll(/\d+/g)].map((match) => Number(match[0]));
 }
 
+/**
+ * Resolve a PL label into an inclusive column range. Handles Migne shorthand
+ * like "941\u201342" (941\u2013942), "947\u201372" (947\u2013972) as well as plain
+ * single columns such as "941".
+ */
+function columnRange(label: string): { start: number; end: number } {
+  const dash = /(\d+)\s*[–—-]\s*(\d+)/.exec(label);
+  if (dash) {
+    const first = dash[1];
+    const second = dash[2];
+    const end =
+      second.length < first.length
+        ? Number(first.slice(0, first.length - second.length) + second)
+        : Number(second);
+    return { start: Number(first), end };
+  }
+  const single = /\d+/.exec(label);
+  const start = single ? Number(single[0]) : NaN;
+  return { start, end: start };
+}
+
 export function facsimileFor(plColumn: string, leaves: SourceLeaf[]): string | null {
   for (const n of columnNumbers(plColumn)) {
     const leaf = leaves.find((item) => {
-      const [start, end] = columnNumbers(item.columns);
-      const last = end ?? start;
-      return n >= start && n <= last;
+      const { start, end } = columnRange(item.columns);
+      return n >= start && n <= end;
     });
     if (leaf) return leaf.facsimile;
   }
