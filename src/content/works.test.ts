@@ -1,11 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { defaultWorkId, getWork, isWorkId, works } from "./works";
+import { defaultWorkId, getWork, isWorkId, nextWorkId, workShortLabel, works } from "./works";
 import { allChapters, allPassages } from "./types";
 
 describe("works registry", () => {
   it("lists De gradibus then the Rule", () => {
     expect(works.map((work) => work.id)).toEqual(["gradibus", "rule"]);
     expect(defaultWorkId).toBe("gradibus");
+  });
+
+  it("cycles the work toggle Gradibus ↔ Rule", () => {
+    expect(nextWorkId("gradibus")).toBe("rule");
+    expect(nextWorkId("rule")).toBe("gradibus");
+    expect(workShortLabel("gradibus")).toBe("Gradibus");
+    expect(workShortLabel("rule")).toBe("Regula");
   });
 
   it("resolves a registered work", () => {

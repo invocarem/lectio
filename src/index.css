@@ -20,6 +20,8 @@
   --glow-edge: #c9a227;    /* underline edge of the active highlight */
   --curated-fg: #14532d;   /* curated tag text */
   --curated-bg: #dcfce7;   /* curated tag background */
+
+  color-scheme: light;
 }
 
 /* Dark parchment / night reading theme. Driven by <html data-theme="dark">,
@@ -44,6 +46,8 @@
     --glow-edge: #6b521f;
     --curated-fg: #86efac;
     --curated-bg: #143d23;
+
+    color-scheme: dark;
   }
 
 * {
@@ -72,6 +76,14 @@ a {
 button,
 select {
   font: inherit;
+  color: inherit;
+}
+
+select,
+select option {
+  color: var(--ink);
+  background-color: var(--field);
+  -webkit-text-fill-color: var(--ink);
 }
 
 .shell {
@@ -85,13 +97,16 @@ select {
 }
 
 .masthead {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: "brand nav tools";
   align-items: center;
-  gap: 1rem;
+  column-gap: 0.75rem;
+  row-gap: 0.55rem;
   border-bottom: 1px solid var(--rule);
   padding-bottom: 0.85rem;
   margin-bottom: 1.75rem;
+  min-width: 0;
 }
 
 .masthead a {
@@ -99,6 +114,7 @@ select {
 }
 
 .wordmark {
+  grid-area: brand;
   font-family: "Cormorant Garamond", Georgia, serif;
   font-size: 1.65rem;
   letter-spacing: 0.18em;
@@ -106,35 +122,22 @@ select {
 }
 
 .mast-nav {
+  grid-area: nav;
   display: flex;
-  gap: 1.25rem;
+  flex-wrap: nowrap;
+  gap: 0.65rem;
   align-items: center;
   font-size: 0.92rem;
   letter-spacing: 0.04em;
+  min-width: 0;
 }
 
-.work-pick {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.78rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
+.mast-nav a {
+  white-space: nowrap;
+  flex: none;
 }
 
-.work-pick select {
-  font: inherit;
-  text-transform: none;
-  letter-spacing: 0;
-  color: var(--ink);
-  border: 1px solid var(--rule);
-  background: var(--field);
-  padding: 0.3rem 0.45rem;
-}
-
-/* Chapter picker in the lectio masthead. Capped so a long English title
-   (e.g. De gradibus Caput V) cannot inflate the control past the screen. */
+/* Chapter picker sits in the remaining middle space and ellipsizes. */
 .mast-nav .chapter-pick {
   font: inherit;
   letter-spacing: 0;
@@ -142,21 +145,22 @@ select {
   border: 1px solid var(--rule);
   background: var(--field);
   padding: 0.3rem 0.45rem;
-  max-width: min(26rem, 72vw);
   min-width: 0;
+  flex: 1 1 auto;
+  max-width: 100%;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.mast-nav {
-  min-width: 0;
+.mast-tools {
+  grid-area: tools;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: none;
 }
 
-.work-pick,
-.mast-nav a {
-  white-space: nowrap;
-}
-
+.work-toggle,
 .theme-toggle {
   font: inherit;
   line-height: 1;
@@ -166,13 +170,48 @@ select {
   padding: 0.35rem 0.55rem;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 1.05rem;
   flex: none;
 }
 
+.work-toggle {
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.theme-toggle {
+  font-size: 1.05rem;
+}
+
+.work-toggle:hover,
+.work-toggle:focus-visible,
 .theme-toggle:hover,
 .theme-toggle:focus-visible {
   border-color: var(--ink);
+}
+
+@media (max-width: 720px) {
+  .shell {
+    padding-left: max(0.85rem, env(safe-area-inset-left));
+    padding-right: max(0.85rem, env(safe-area-inset-right));
+  }
+
+  .masthead:has(.mast-nav) {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "brand tools"
+      "nav nav";
+  }
+
+  .wordmark {
+    font-size: 1.2rem;
+    letter-spacing: 0.1em;
+  }
+
+  .view-btn {
+    padding: 0.38rem 0.48rem;
+    font-size: 0.78rem;
+  }
 }
 
 .work-list {
@@ -352,7 +391,49 @@ h3 {
 .step-btn {
   border: 1px solid var(--rule);
   background: var(--field);
+  color: var(--ink);
   padding: 0.35rem 0.55rem;
+}
+
+.view-toggle {
+  display: inline-flex;
+  flex-wrap: wrap;
+  max-width: 100%;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--field);
+}
+
+.view-btn {
+  border: 0;
+  border-right: 1px solid var(--rule);
+  background: var(--field);
+  color: var(--ink);
+  padding: 0.4rem 0.65rem;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+}
+
+.view-btn:last-child {
+  border-right: 0;
+}
+
+.view-btn.active {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.view-btn:hover:not(.active),
+.view-btn:focus-visible:not(.active) {
+  background: var(--paper-deep);
+}
+
+.passage-count {
+  color: var(--ink-soft);
+  font-size: 0.86rem;
 }
 
 .passage.facing {
@@ -593,6 +674,17 @@ h3 {
   max-width: 34rem;
 }
 
+.leaf-zoom-btn {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: zoom-in;
+  line-height: 0;
+}
+
 .leaf-figure img {
   display: block;
   width: 100%;
@@ -601,10 +693,110 @@ h3 {
   background: var(--figure-bg);
 }
 
+.leaf-enlarge {
+  position: absolute;
+  right: 0.45rem;
+  bottom: 0.45rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--paper) 82%, transparent);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  pointer-events: none;
+}
+
+.leaf-enlarge svg {
+  width: 1.05rem;
+  height: 1.05rem;
+  display: block;
+}
+
 .leaf-figure figcaption {
   margin-top: 0.5rem;
   color: var(--ink-soft);
   font-size: 0.82rem;
+}
+
+.leaf-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  background: #0c0905;
+  color: #f4ead8;
+  touch-action: none;
+  overscroll-behavior: none;
+}
+
+.leaf-viewer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex: none;
+  padding:
+    calc(0.55rem + env(safe-area-inset-top))
+    max(0.75rem, env(safe-area-inset-right))
+    0.5rem
+    max(0.75rem, env(safe-area-inset-left));
+}
+
+.leaf-viewer-hint {
+  margin: 0;
+  font-size: 0.82rem;
+  letter-spacing: 0.03em;
+  color: #d8c9aa;
+}
+
+.leaf-viewer-close {
+  border: 1px solid #8a7350;
+  background: #241c11;
+  color: #f4ead8;
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+  border-radius: 4px;
+  flex: none;
+}
+
+.leaf-viewer-stage {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding:
+    0
+    max(0.5rem, env(safe-area-inset-right))
+    max(0.75rem, env(safe-area-inset-bottom))
+    max(0.5rem, env(safe-area-inset-left));
+}
+
+.leaf-viewer-stage img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  transform-origin: center center;
+  will-change: transform;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+body.leaf-viewer-open {
+  overflow: hidden;
 }
 
 .steps {

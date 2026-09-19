@@ -10,6 +10,18 @@ export const works: Work[] = [gradibus, rule];
 
 export const defaultWorkId: WorkId = "gradibus";
 
+/** Cycle Gradibus ↔ Rule. Unknown/missing ids fall back to the default work. */
+export function nextWorkId(id: WorkId = defaultWorkId): WorkId {
+  const index = works.findIndex((work) => work.id === id);
+  const from = index < 0 ? 0 : index;
+  return works[(from + 1) % works.length].id;
+}
+
+/** Compact masthead label; full titles stay on the work home page. */
+export function workShortLabel(id: WorkId): string {
+  return id === "rule" ? "Regula" : "Gradibus";
+}
+
 export function getWork(id: WorkId): Work {
   const work = works.find((entry) => entry.id === id);
   if (!work) {

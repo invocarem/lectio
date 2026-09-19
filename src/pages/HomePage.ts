@@ -3,12 +3,11 @@ import { allPassages, findChapter } from "../content/types";
 import type { Work } from "../content/types";
 import { works, workContentsPath, workHomePath, workLectioPath } from "../content/works";
 import { createMasthead } from "../components/Masthead";
-import { navigate } from "../nav";
 import { readLastPosition } from "../lastPosition";
 
 export function renderLibrary(): HTMLElement {
   return el("div", { className: "shell" },
-    createMasthead({ onWorkChange: (id) => navigate(id ? workHomePath(id) : "/") }),
+    createMasthead(),
     el("section", { className: "hero" },
       el("p", { className: "kicker" }, "Library"),
       el("h1", null, "Lectio"),
@@ -61,7 +60,6 @@ export function renderWorkHome(work: Work): HTMLElement {
         el("a", { href: workContentsPath(work.id) }, "Contents"),
         el("a", { href: beginPath }, "Begin"),
       ],
-      onWorkChange: (id) => navigate(id ? workHomePath(id) : "/"),
     }),
     el("section", { className: "hero" },
       el("p", { className: "kicker" }, work.author.la),

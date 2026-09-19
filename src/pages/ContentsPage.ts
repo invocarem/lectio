@@ -3,14 +3,12 @@ import { chapterLabel, cite } from "../content/types";
 import type { Work } from "../content/types";
 import { workHomePath, workLectioPath } from "../content/works";
 import { createMasthead } from "../components/Masthead";
-import { navigate } from "../nav";
 
 export function renderContents(work: Work): HTMLElement {
   return el("div", { className: "shell" },
     createMasthead({
       workId: work.id,
       extra: [el("a", { href: workHomePath(work.id) }, "Home")],
-      onWorkChange: (id) => navigate(id ? workHomePath(id) : "/"),
     }),
     ...work.parts.map((part) =>
       el("section", { className: "part" },

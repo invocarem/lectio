@@ -5,7 +5,7 @@ import { createDictPopup } from "../components/DictPopup";
 import { createSourceLeaf } from "../components/SourceLeaf";
 import { createMasthead } from "../components/Masthead";
 import { navigate } from "../nav";
-import { workContentsPath, workHomePath, workLectioPath } from "../content/works";
+import { workContentsPath, workLectioPath } from "../content/works";
 import { saveLastPosition } from "../lastPosition";
 
 type Mode = "both" | "la" | "en";
@@ -144,23 +144,34 @@ export function renderLectio(work: Work, chapterId: string, passageIndex: number
     );
     const promptEl = el("p", { className: "prompt" }, currentStep().prompt);
 
-    const modeSelect = el("select", {
-      value: mode,
-      onChange: (event: Event) => {
-        mode = (event.target as HTMLSelectElement).value as Mode;
-        closeDict();
-        renderArticle();
-      },
+    const modes: { id: Mode; label: string }[] = [
+      { id: "both", label: "Latin & English" },
+      { id: "la", label: "Latin" },
+      { id: "en", label: "English" },
+    ];
+    const modeGroup = el("div", {
+      className: "view-toggle",
+      role: "group",
+      aria: { label: "View" },
     },
-      el("option", { value: "both" }, "Latin and English"),
-      el("option", { value: "la" }, "Latin only"),
-      el("option", { value: "en" }, "English only"),
+      ...modes.map((item) =>
+        el("button", {
+          type: "button",
+          className: `view-btn${item.id === mode ? " active" : ""}`,
+          aria: { pressed: item.id === mode },
+          onClick: () => {
+            if (mode === item.id) return;
+            mode = item.id;
+            closeDict();
+            renderArticle();
+          },
+        }, item.label),
+      ),
     );
-    modeSelect.value = mode;
 
     const toolbar = el("div", { className: "toolbar" },
-      el("label", null, "View ", modeSelect),
-      el("span", null, `Passage ${globalIndex + 1} of ${sequence.length}`),
+      modeGroup,
+      el("span", { className: "passage-count" }, `Passage ${globalIndex + 1} of ${sequence.length}`),
     );
 
     const passageEl = el("div", {
@@ -330,7 +341,6 @@ export function renderLectio(work: Work, chapterId: string, passageIndex: number
         el("a", { href: workContentsPath(work.id) }, "Contents"),
         chapterSelect,
       ],
-      onWorkChange: (id) => navigate(id ? workHomePath(id) : "/"),
     }),
     el("div", { className: "progress", aria: { hidden: "true" } },
       el("span", { className: "progress-bar", style: { width: `${progress}%` } }),
