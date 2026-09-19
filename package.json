@@ -8,6 +8,7 @@
     "build": "tsc --noEmit && vite build",
     "test": "vitest run --pool=vmForks",
     "test:watch": "vitest --pool=vmForks",
+    "test:gradibus-text": "vitest run --pool=vmForks src/content/gradibus/textQuality.test.ts",
     "preview": "vite preview",
     "cap:sync": "npm run build && npx cap sync ios",
     "ios": "npm run cap:sync && npx cap open ios",
