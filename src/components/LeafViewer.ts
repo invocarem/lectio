@@ -1,12 +1,10 @@
-import { el } from "../dom";
-
 const MIN_SCALE = 1;
 const MAX_SCALE = 6;
 const DOUBLE_TAP_MS = 280;
 const DOUBLE_TAP_PX = 28;
 
 export function clamp(n: number, lo: number, hi: number): number {
-  return Math.min(hi, Math.max(lo, n));
+  return Math.min(hi, Math.max(lo, n)) || 0;
 }
 
 /**
@@ -35,40 +33,24 @@ export function zoomAround(state: {
   };
 }
 
-let active: { close: () => void } | null = null;
+/** Keep the zoomed image covering the stage so empty margins do not appear. */
+export function clampPan(state: {
+  scale: number;
+  panX: number;
+  panY: number;
+  width: number;
+  height: number;
+}): { panX: number; panY: number } {
+  const maxX = Math.max(0, (state.width * (state.scale - 1)) / 2);
+  const maxY = Math.max(0, (state.height * (state.scale - 1)) / 2);
+  return {
+    panX: clamp(state.panX, -maxX, maxX),
+    panY: clamp(state.panY, -maxY, maxY),
+  };
+}
 
-/** Fullscreen facsimile viewer with pinch, pan, and double-tap zoom. */
-export function openLeafViewer(opts: { src: string; alt: string }): { close: () => void } {
-  active?.close();
-
-  const img = el("img", {
-    src: opts.src,
-    alt: opts.alt,
-    draggable: "false",
-  });
-
-  const closeBtn = el("button", {
-    type: "button",
-    className: "leaf-viewer-close",
-    aria: { label: "Close page image" },
-    onClick: (event: MouseEvent) => {
-      event.stopPropagation();
-      close();
-    },
-  }, "Close");
-
-  const hint = el("p", { className: "leaf-viewer-hint" }, "Pinch to zoom · drag to pan");
-
-  const stage = el("div", { className: "leaf-viewer-stage" }, img);
-  const overlay = el("div", {
-    className: "leaf-viewer",
-    role: "dialog",
-    aria: { modal: "true", label: "Page image. Pinch to zoom." },
-  },
-    el("div", { className: "leaf-viewer-bar" }, hint, closeBtn),
-    stage,
-  );
-
+/** Pinch, pan, wheel, and double-tap zoom inside a fixed-size stage. */
+export function attachLeafZoom(stage: HTMLElement, img: HTMLElement): () => void {
   let scale = 1;
   let panX = 0;
   let panY = 0;
@@ -83,7 +65,25 @@ export function openLeafViewer(opts: { src: string; alt: string }): { close: () 
   let moved = false;
 
   function apply(): void {
+    const rect = stage.getBoundingClientRect();
+    if (rect.width >= 1 && rect.height >= 1) {
+      const next = clampPan({
+        scale,
+        panX,
+        panY,
+        width: rect.width,
+        height: rect.height,
+      });
+      panX = next.panX;
+      panY = next.panY;
+    }
+    if (scale < MIN_SCALE + 0.02) {
+      scale = MIN_SCALE;
+      panX = 0;
+      panY = 0;
+    }
     img.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+    stage.classList.toggle("zoomed", scale > MIN_SCALE);
   }
 
   function stagePoint(event: PointerEvent): { x: number; y: number } {
@@ -173,13 +173,7 @@ export function openLeafViewer(opts: { src: string; alt: string }): { close: () 
     const pt = pointers.get(event.pointerId)!;
     pointers.delete(event.pointerId);
     resetPinch();
-
-    if (scale < MIN_SCALE + 0.02) {
-      scale = MIN_SCALE;
-      panX = 0;
-      panY = 0;
-      apply();
-    }
+    apply();
 
     if (pointers.size !== 0 || moved) return;
 
@@ -233,23 +227,7 @@ export function openLeafViewer(opts: { src: string; alt: string }): { close: () 
     scale = zoomed.scale;
     panX = zoomed.panX;
     panY = zoomed.panY;
-    if (scale === MIN_SCALE) {
-      panX = 0;
-      panY = 0;
-    }
     apply();
-  }
-
-  function onKey(event: KeyboardEvent): void {
-    if (event.key === "Escape") close();
-  }
-
-  function close(): void {
-    if (active?.close !== close) return;
-    active = null;
-    document.removeEventListener("keydown", onKey);
-    overlay.remove();
-    document.body.classList.remove("leaf-viewer-open");
   }
 
   stage.addEventListener("pointerdown", onPointerDown);
@@ -257,12 +235,13 @@ export function openLeafViewer(opts: { src: string; alt: string }): { close: () 
   stage.addEventListener("pointerup", onPointerUp);
   stage.addEventListener("pointercancel", onPointerUp);
   stage.addEventListener("wheel", onWheel, { passive: false });
-  document.addEventListener("keydown", onKey);
-  document.body.classList.add("leaf-viewer-open");
-  document.body.append(overlay);
   apply();
 
-  const handle = { close };
-  active = handle;
-  return handle;
+  return () => {
+    stage.removeEventListener("pointerdown", onPointerDown);
+    stage.removeEventListener("pointermove", onPointerMove);
+    stage.removeEventListener("pointerup", onPointerUp);
+    stage.removeEventListener("pointercancel", onPointerUp);
+    stage.removeEventListener("wheel", onWheel);
+  };
 }

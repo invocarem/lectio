@@ -674,120 +674,20 @@ h3 {
   max-width: 34rem;
 }
 
-.leaf-zoom-btn {
-  position: relative;
-  display: block;
-  width: 100%;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: zoom-in;
-  line-height: 0;
-}
-
-.leaf-figure img {
-  display: block;
-  width: 100%;
-  height: auto;
-  border: 1px solid var(--rule);
-  background: var(--figure-bg);
-}
-
-.leaf-enlarge {
-  position: absolute;
-  right: 0.45rem;
-  bottom: 0.45rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 4px;
-  background: color-mix(in srgb, var(--paper) 82%, transparent);
-  color: var(--ink);
-  border: 1px solid var(--rule);
-  pointer-events: none;
-}
-
-.leaf-enlarge svg {
-  width: 1.05rem;
-  height: 1.05rem;
-  display: block;
-}
-
-.leaf-figure figcaption {
-  margin-top: 0.5rem;
-  color: var(--ink-soft);
-  font-size: 0.82rem;
-}
-
-.leaf-viewer {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-  height: 100dvh;
-  background: #0c0905;
-  color: #f4ead8;
-  touch-action: none;
-  overscroll-behavior: none;
-}
-
-.leaf-viewer-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  flex: none;
-  padding:
-    calc(0.55rem + env(safe-area-inset-top))
-    max(0.75rem, env(safe-area-inset-right))
-    0.5rem
-    max(0.75rem, env(safe-area-inset-left));
-}
-
-.leaf-viewer-hint {
-  margin: 0;
-  font-size: 0.82rem;
-  letter-spacing: 0.03em;
-  color: #d8c9aa;
-}
-
-.leaf-viewer-close {
-  border: 1px solid #8a7350;
-  background: #241c11;
-  color: #f4ead8;
-  padding: 0.4rem 0.75rem;
-  cursor: pointer;
-  border-radius: 4px;
-  flex: none;
-}
-
-.leaf-viewer-stage {
-  flex: 1;
-  min-height: 0;
+.leaf-stage {
   position: relative;
   overflow: hidden;
   touch-action: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding:
-    0
-    max(0.5rem, env(safe-area-inset-right))
-    max(0.75rem, env(safe-area-inset-bottom))
-    max(0.5rem, env(safe-area-inset-left));
+  overscroll-behavior: none;
+  border: 1px solid var(--rule);
+  background: var(--figure-bg);
+  line-height: 0;
 }
 
-.leaf-viewer-stage img {
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
+.leaf-stage img {
+  display: block;
+  width: 100%;
   height: auto;
-  object-fit: contain;
   transform-origin: center center;
   will-change: transform;
   user-select: none;
@@ -795,8 +695,18 @@ h3 {
   pointer-events: none;
 }
 
-body.leaf-viewer-open {
-  overflow: hidden;
+.leaf-stage.zoomed {
+  cursor: grab;
+}
+
+.leaf-stage.zoomed:active {
+  cursor: grabbing;
+}
+
+.leaf-figure figcaption {
+  margin-top: 0.5rem;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
 }
 
 .steps {

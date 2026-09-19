@@ -1,6 +1,6 @@
 import { el } from "../dom";
 import type { SourceLeaf, Work } from "../content/types";
-import { openLeafViewer } from "./LeafViewer";
+import { attachLeafZoom } from "./LeafViewer";
 
 /** Find the leaf metadata for a facsimile filename, if it is in this collection. */
 export function leafForFacsimile(facsimile: string | null, leaves: SourceLeaf[]): SourceLeaf | undefined {
@@ -21,17 +21,12 @@ const LEAF_ICON =
     <path d="M5 12.5C8.5 9.5 13 8 18.5 6.6" stroke="#2c5e2a" stroke-width="1.1" stroke-linecap="round"/>
   </svg>`;
 
-const ENLARGE_ICON =
-  `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path d="M9 4H4v5M15 4h5v5M4 15v5h5M20 15v5h-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>`;
-
 /**
  * A collapsible "source leaf" panel for a passage. Collapsed by default; the
  * heavy PNG only loads the first time the reader opens it. Works without
  * facsimiles (the Rule) render nothing. When a passage in a work that has
  * leaves is missing its image, a short note is shown instead of a broken image.
- * Tapping the image opens a fullscreen viewer that supports pinch-to-zoom.
+ * Pinch or scroll-wheel zooms the image in place so the Latin above stays visible.
  */
 export function createSourceLeaf(facsimile: string | null, work: Work): HTMLElement | null {
   if (work.source.leaves.length === 0) return null;
@@ -55,20 +50,12 @@ export function createSourceLeaf(facsimile: string | null, work: Work): HTMLElem
     draggable: "false",
   });
 
-  const enlarge = el("span", { className: "leaf-enlarge", aria: { hidden: "true" } });
-  enlarge.innerHTML = ENLARGE_ICON;
-
-  const zoomBtn = el("button", {
-    type: "button",
-    className: "leaf-zoom-btn",
-    "aria-label": "Enlarge page image. Pinch to zoom.",
-    title: "Enlarge · pinch to zoom",
-    onClick: () => openLeafViewer({ src, alt }),
-  }, img, enlarge);
+  const stage = el("div", { className: "leaf-stage" }, img);
+  attachLeafZoom(stage, img);
 
   const figure = el("figure", { className: "leaf-figure", hidden: true },
-    zoomBtn,
-    el("figcaption", null, `${leafCaption(leaf)} · tap to enlarge, pinch to zoom`),
+    stage,
+    el("figcaption", null, `${leafCaption(leaf)} · pinch to zoom, drag to pan`),
   );
 
   let open = false;

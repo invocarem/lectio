@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { leafForFacsimile } from "./SourceLeaf";
-import { clamp, zoomAround } from "./LeafViewer";
+import { clamp, clampPan, zoomAround } from "./LeafViewer";
 import { getWork } from "../content/works";
 
 const leaves = getWork("gradibus").source.leaves;
@@ -57,5 +57,21 @@ describe("zoomAround", () => {
     });
     expect(next.panX).toBe(-100);
     expect(next.panY).toBe(0);
+  });
+});
+
+describe("clampPan", () => {
+  it("resets pan at 1x because the image already fills the stage", () => {
+    expect(clampPan({ scale: 1, panX: 40, panY: -12, width: 200, height: 150 })).toEqual({
+      panX: 0,
+      panY: 0,
+    });
+  });
+
+  it("keeps pan inside the extra size created by zoom", () => {
+    expect(clampPan({ scale: 2, panX: 400, panY: -80, width: 200, height: 100 })).toEqual({
+      panX: 100,
+      panY: -50,
+    });
   });
 });
